@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:movie_explorer_app/models/movie.dart';
 
-class MovieDetailScreen extends StatelessWidget {
+class MovieDetailsScreen extends StatelessWidget {
   final Movie movie;
 
-  const MovieDetailScreen({super.key, required this.movie});
+  const MovieDetailsScreen({super.key, required this.movie});
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +17,7 @@ class MovieDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Movie Poster Image
-            if (movie.backdropPath != null)
+
               Container(
                 height: 250,
                 decoration: BoxDecoration(
