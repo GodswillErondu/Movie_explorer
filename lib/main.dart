@@ -1,9 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:movie_explorer_app/screens/movie_screen.dart';
 import 'package:movie_explorer_app/theme/theme.dart';
-import 'package:movie_explorer_app/theme/theme_notifier.dart';
+import 'package:movie_explorer_app/providers/theme_notifier.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -12,7 +11,8 @@ void main() async {
     ChangeNotifierProvider(
       create: (_) => ThemeNotifier(),
       child: const MyApp(),
-    ),  );
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -20,13 +20,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    return MaterialApp(
-      theme: lightMode,
-      darkTheme: darkMode,
-      themeMode: ThemeMode.system,
-      home: const MovieScreen(),
+    return Consumer<ThemeNotifier>(
+      builder: (context, themeNotifier, child) {
+        return MaterialApp(
+          theme: lightMode,
+          darkTheme: darkMode,
+          themeMode: themeNotifier.themeMode,
+          home: const MovieScreen(),
+        );
+      },
     );
   }
 }
-

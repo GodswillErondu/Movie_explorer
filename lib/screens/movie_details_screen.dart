@@ -17,19 +17,17 @@ class MovieDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-
-              Container(
-                height: 250,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(
-                      'https://image.tmdb.org/t/p/w1280${movie.backdropPath}',
-                    ),
-                    fit: BoxFit.cover,
+            Container(
+              height: 250,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(
+                    'https://image.tmdb.org/t/p/w1280${movie.backdropPath}',
                   ),
+                  fit: BoxFit.cover,
                 ),
               ),
-
+            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -39,9 +37,9 @@ class MovieDetailsScreen extends StatelessWidget {
                   Text(
                     movie.title,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
                   ),
                   const SizedBox(height: 24),
 
@@ -49,8 +47,8 @@ class MovieDetailsScreen extends StatelessWidget {
                   Text(
                     'Overview',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   const SizedBox(height: 8),
 
@@ -58,9 +56,9 @@ class MovieDetailsScreen extends StatelessWidget {
                   Text(
                     movie.overview,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      height: 1.5,
-                      fontSize: 16,
-                    ),
+                          height: 1.5,
+                          fontSize: 16,
+                        ),
                   ),
                 ],
               ),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:movie_explorer_app/models/movie.dart';
 import 'package:movie_explorer_app/screens/movie_details_screen.dart';
 import 'package:movie_explorer_app/services/movie_service.dart';
-import 'package:movie_explorer_app/theme/theme_notifier.dart';
+import 'package:movie_explorer_app/providers/theme_notifier.dart';
 import 'package:provider/provider.dart';
 
 class MovieScreen extends StatefulWidget {
@@ -21,8 +21,8 @@ class _MovieScreenState extends State<MovieScreen> {
   @override
   void initState() {
     nowShowingMovies = APIServices().getNowShowingMovies();
-    popularMovies = APIServices().getNowShowingMovies();
-    upcomingMovies = APIServices().getNowShowingMovies();
+    popularMovies = APIServices().getPopularMovies();
+    upcomingMovies = APIServices().getUpcomingMovies();
     super.initState();
   }
 
@@ -31,17 +31,23 @@ class _MovieScreenState extends State<MovieScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Movie Explorer'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.brightness_6),
-            onPressed: () {
-              ThemeNotifier themeNotifier = Provider.of<ThemeNotifier>(context, listen: false);
-              if (themeNotifier.themeMode == ThemeMode.light) {
-                themeNotifier.setTheme(ThemeMode.dark);
-              } else {
-                themeNotifier.setTheme(ThemeMode.light);
-              }
+        backgroundColor: Colors.amber,
+        actions: <Widget>[
+          Consumer<ThemeNotifier>(
+            builder: (context, themeNotifier, child) {
+              return IconButton(
+                icon: Icon(
+                  themeNotifier.themeMode == ThemeMode.dark
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
+                ),
+                onPressed: () {
+                  final newMode = themeNotifier.themeMode == ThemeMode.dark
+                      ? ThemeMode.light
+                      : ThemeMode.dark;
+                  themeNotifier.setTheme(newMode);
+                },
+              );
             },
           ),
         ],
@@ -50,8 +56,8 @@ class _MovieScreenState extends State<MovieScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            const Padding(
+              padding: EdgeInsets.all(12.0),
               child: Text('Now Showing'),
             ),
             FutureBuilder<List<Movie>>(
@@ -76,7 +82,8 @@ class _MovieScreenState extends State<MovieScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MovieDetailsScreen(movie: movie),
+                            builder: (context) =>
+                                MovieDetailsScreen(movie: movie),
                           ),
                         );
                       },
@@ -101,107 +108,110 @@ class _MovieScreenState extends State<MovieScreen> {
                 );
               },
             ),
-
-
             const Text('Popular Movies'),
             Container(
               margin: EdgeInsets.symmetric(vertical: 20),
               height: 200,
               child: FutureBuilder(
-                future: popularMovies, builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+                future: popularMovies,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                if (snapshot.hasError) {
-                  return const Center(child: Text('Error loading movies'));
-                }
-                final movies = snapshot.data ?? [];
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: movies.length,
-                  itemBuilder: (context, index) {
-                    final movie = movies[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MovieDetailsScreen(movie: movie),
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('Error loading movies'));
+                  }
+                  final movies = snapshot.data ?? [];
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: movies.length,
+                    itemBuilder: (context, index) {
+                      final movie = movies[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  MovieDetailsScreen(movie: movie),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 150.0,
+                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardTheme.color,
+                            borderRadius: BorderRadius.circular(16.0),
                           ),
-                        );
-                      },
-                      child: Container(
-                        width: 150.0,
-                        margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardTheme.color,
-                          borderRadius: BorderRadius.circular(16.0),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16.0),
-                          child: Image.network(
-                            'https://image.tmdb.org/t/p/w500${movie.backdropPath}',
-                            height: 120,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16.0),
+                            child: Image.network(
+                              'https://image.tmdb.org/t/p/w500${movie.backdropPath}',
+                              height: 120,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );              },
+                      );
+                    },
+                  );
+                },
               ),
             ),
-
             const Text('Upcoming Movies'),
             Container(
               margin: EdgeInsets.symmetric(vertical: 20),
               height: 200,
               child: FutureBuilder(
-                future: upcomingMovies, builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+                future: upcomingMovies,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                if (snapshot.hasError) {
-                  return const Center(child: Text('Error loading movies'));
-                }
-                final movies = snapshot.data ?? [];
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: movies.length,
-                  itemBuilder: (context, index) {
-                    final movie = movies[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MovieDetailsScreen(movie: movie),
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('Error loading movies'));
+                  }
+                  final movies = snapshot.data ?? [];
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: movies.length,
+                    itemBuilder: (context, index) {
+                      final movie = movies[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  MovieDetailsScreen(movie: movie),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: 150.0,
+                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardTheme.color,
+                            borderRadius: BorderRadius.circular(16.0),
                           ),
-                        );
-                      },
-                      child: Container(
-                        width: 150.0,
-                        margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).cardTheme.color,
-                          borderRadius: BorderRadius.circular(16.0),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(16.0),
-                          child: Image.network(
-                            'https://image.tmdb.org/t/p/w500${movie.backdropPath}',
-                            height: 120,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16.0),
+                            child: Image.network(
+                              'https://image.tmdb.org/t/p/w500${movie.backdropPath}',
+                              height: 120,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );              },
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],
