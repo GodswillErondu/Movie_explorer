@@ -56,9 +56,9 @@ class _MovieScreenState extends State<MovieScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Padding(
-              padding: EdgeInsets.all(12.0),
-              child: Text('Now Showing'),
+             Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text('Now Showing', style: Theme.of(context).textTheme.titleLarge),
             ),
             FutureBuilder<List<Movie>>(
               future: nowShowingMovies,
@@ -108,7 +108,8 @@ class _MovieScreenState extends State<MovieScreen> {
                 );
               },
             ),
-            const Text('Popular Movies'),
+            SizedBox(height: 4.0,),
+            Text('Popular Movies', style: Theme.of(context).textTheme.titleLarge),
             Container(
               margin: EdgeInsets.symmetric(vertical: 20),
               height: 200,
@@ -161,7 +162,7 @@ class _MovieScreenState extends State<MovieScreen> {
                 },
               ),
             ),
-            const Text('Upcoming Movies'),
+            Text('Upcoming Movies', style: Theme.of(context).textTheme.titleLarge),
             Container(
               margin: EdgeInsets.symmetric(vertical: 20),
               height: 200,
