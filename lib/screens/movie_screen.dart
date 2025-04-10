@@ -35,17 +35,32 @@ class _MovieScreenState extends State<MovieScreen> {
         actions: <Widget>[
           Consumer<ThemeNotifier>(
             builder: (context, themeNotifier, child) {
-              return IconButton(
-                icon: Icon(
-                  themeNotifier.themeMode == ThemeMode.dark
-                      ? Icons.light_mode
-                      : Icons.dark_mode,
-                ),
-                onPressed: () {
-                  final newMode = themeNotifier.themeMode == ThemeMode.dark
-                      ? ThemeMode.light
-                      : ThemeMode.dark;
-                  themeNotifier.setTheme(newMode);
+              return PopupMenuButton<ThemeModeOption>(
+                icon: Icon(themeNotifier.currentIcon),
+                offset: const Offset(0, 40),
+                itemBuilder: (BuildContext context) => [
+                  _buildThemeMenuItem(
+                    context,
+                    ThemeModeOption.system,
+                    'System',
+                    themeNotifier,
+                  ),
+                  _buildThemeMenuItem(
+                    context,
+                    ThemeModeOption.light,
+                    'Light',
+                    themeNotifier,
+                  ),
+                  _buildThemeMenuItem(
+                    context,
+                    ThemeModeOption.dark,
+                    'Dark',
+                    themeNotifier,
+                  ),
+                ],
+                onSelected: (ThemeModeOption selectedTheme) {
+                  themeNotifier.setTheme(selectedTheme);
+                  _showThemeChangeSnackBar(context, selectedTheme);
                 },
               );
             },
@@ -56,9 +71,10 @@ class _MovieScreenState extends State<MovieScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-             Padding(
+            Padding(
               padding: const EdgeInsets.all(12.0),
-              child: Text('Now Showing', style: Theme.of(context).textTheme.titleLarge),
+              child: Text('Now Showing',
+                  style: Theme.of(context).textTheme.titleLarge),
             ),
             FutureBuilder<List<Movie>>(
               future: nowShowingMovies,
@@ -108,10 +124,13 @@ class _MovieScreenState extends State<MovieScreen> {
                 );
               },
             ),
-            SizedBox(height: 4.0,),
-            Text('Popular Movies', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(
+              height: 4.0,
+            ),
+            Text('Popular Movies',
+                style: Theme.of(context).textTheme.titleLarge),
             Container(
-              margin: EdgeInsets.symmetric(vertical: 20),
+              margin: const EdgeInsets.symmetric(vertical: 20),
               height: 200,
               child: FutureBuilder(
                 future: popularMovies,
@@ -162,9 +181,10 @@ class _MovieScreenState extends State<MovieScreen> {
                 },
               ),
             ),
-            Text('Upcoming Movies', style: Theme.of(context).textTheme.titleLarge),
+            Text('Upcoming Movies',
+                style: Theme.of(context).textTheme.titleLarge),
             Container(
-              margin: EdgeInsets.symmetric(vertical: 20),
+              margin: const EdgeInsets.symmetric(vertical: 20),
               height: 200,
               child: FutureBuilder(
                 future: upcomingMovies,
@@ -216,6 +236,80 @@ class _MovieScreenState extends State<MovieScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  PopupMenuItem<ThemeModeOption> _buildThemeMenuItem(
+    BuildContext context,
+    ThemeModeOption option,
+    String label,
+    ThemeNotifier themeNotifier,
+  ) {
+    final isSelected = themeNotifier.selectedOption == option;
+
+    return PopupMenuItem<ThemeModeOption>(
+      value: option,
+      child: Row(
+        children: [
+          Icon(
+            option.icon,
+            color: isSelected ? Colors.amber : null,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.amber : null,
+              fontWeight: isSelected ? FontWeight.bold : null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showThemeChangeSnackBar(
+      BuildContext context, ThemeModeOption selectedTheme) {
+    String themeName = selectedTheme.name;
+    themeName = themeName[0].toUpperCase() + themeName.substring(1);
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              selectedTheme.icon,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Theme switched to $themeName',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isDark ? Colors.grey[850] : Colors.grey[200],
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        action: SnackBarAction(
+          label: 'DISMISS',
+          textColor: Theme.of(context).colorScheme.primary,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
         ),
       ),
     );

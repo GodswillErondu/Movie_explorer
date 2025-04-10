@@ -23,9 +23,10 @@ class MyApp extends StatelessWidget {
     return Consumer<ThemeNotifier>(
       builder: (context, themeNotifier, child) {
         return MaterialApp(
-          theme: lightMode,
-          darkTheme: darkMode,
-          themeMode: themeNotifier.themeMode,
+          title: 'Movie Explorer',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeNotifier.effectiveThemeMode,
           home: const MovieScreen(),
         );
       },
