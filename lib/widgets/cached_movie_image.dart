@@ -37,7 +37,7 @@ class CachedMovieImage extends StatelessWidget {
       ),
       errorWidget: (context, url, error) => Container(
         color: Colors.grey[300],
-        child: const Icon(Icons.error),
+        child: Center(child: const Text('No internet connection')),
       ),
     );
   }

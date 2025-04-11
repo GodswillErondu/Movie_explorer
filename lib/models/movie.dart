@@ -34,4 +34,11 @@ class Movie extends HiveObject {
       'overview': overview,
     };
   }
+
+  @override
+  int get hashCode => Object.hash(title, backdropPath, overview);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is Movie && other.hashCode == hashCode;
 }

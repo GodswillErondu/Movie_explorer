@@ -15,18 +15,19 @@ class MovieScreen extends StatefulWidget {
 }
 
 class _MovieScreenState extends State<MovieScreen> {
-  late Future<List<Movie>> nowShowingMovies;
-  late Future<List<Movie>> popularMovies;
-  late Future<List<Movie>> upcomingMovies;
+  Future<List<Movie>>? nowShowingMovies;
+  Future<List<Movie>>? popularMovies;
+  Future<List<Movie>>? upcomingMovies;
   late MovieService _movieService;
 
   @override
   void initState() {
     super.initState();
-    // Get the MovieService instance from the provider
     _movieService = Provider.of<MovieService>(context, listen: false);
+    _initializeMovieData();
+  }
 
-    // Initialize the futures using the movie service
+  void _initializeMovieData() {
     nowShowingMovies = _movieService.getNowShowingMovies();
     popularMovies = _movieService.getPopularMovies();
     upcomingMovies = _movieService.getUpcomingMovies();
