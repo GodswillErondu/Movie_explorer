@@ -15,9 +15,9 @@ class MovieScreen extends StatefulWidget {
 }
 
 class _MovieScreenState extends State<MovieScreen> {
-  Future<List<Movie>>? nowShowingMovies;
-  Future<List<Movie>>? popularMovies;
-  Future<List<Movie>>? upcomingMovies;
+  late Future<List<Movie>> nowShowingMovies;
+  late Future<List<Movie>> popularMovies;
+  late Future<List<Movie>> upcomingMovies;
   late MovieService _movieService;
 
   @override

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:movie_explorer_app/providers/audio_player_provider.dart';
+import 'package:movie_explorer_app/screens/main_screen.dart';
 import 'package:movie_explorer_app/screens/movie_screen.dart';
+import 'package:movie_explorer_app/services/audio_service.dart';
 import 'package:movie_explorer_app/theme/theme.dart';
 import 'package:movie_explorer_app/providers/theme_notifier.dart';
 import 'package:provider/provider.dart';
@@ -13,8 +16,8 @@ void main() async {
   await dotenv.load(fileName: '.env');
   final cacheService = await CacheService.initialize();
   final movieService = MovieService(cacheService);
+  final audioService = AudioService(cacheService);
 
-  // Add this to handle app termination
   WidgetsBinding.instance.addObserver(
     LifecycleEventHandler(
       detached: () async {
@@ -27,7 +30,10 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeNotifier()),
+        ChangeNotifierProvider(create: (_) => AudioPlayerProvider()),
         Provider.value(value: movieService),
+        Provider.value(value: audioService),
+
       ],
       child: const MyApp(),
     ),
@@ -46,7 +52,7 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeNotifier.effectiveThemeMode,
-          home: const MovieScreen(),
+          home: const MainScreen(),
         );
       },
     );
