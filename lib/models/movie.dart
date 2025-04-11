@@ -1,6 +1,16 @@
-class Movie {
+import 'package:hive/hive.dart';
+
+part 'movie.g.dart';
+
+@HiveType(typeId: 0)
+class Movie extends HiveObject {
+  @HiveField(0)
   final String title;
+
+  @HiveField(1)
   final String backdropPath;
+
+  @HiveField(2)
   final String overview;
 
   Movie({
@@ -24,17 +34,4 @@ class Movie {
       'overview': overview,
     };
   }
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Movie &&
-          runtimeType == other.runtimeType &&
-          title == other.title &&
-          backdropPath == other.backdropPath &&
-          overview == other.overview;
-
-  @override
-  int get hashCode =>
-      title.hashCode ^ backdropPath.hashCode ^ overview.hashCode;
 }

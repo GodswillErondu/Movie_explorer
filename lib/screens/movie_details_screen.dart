@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movie_explorer_app/models/movie.dart';
+import 'package:movie_explorer_app/widgets/cached_movie_image.dart';
 
 class MovieDetailsScreen extends StatelessWidget {
   final Movie movie;
@@ -19,13 +20,9 @@ class MovieDetailsScreen extends StatelessWidget {
           children: [
             Container(
               height: 250,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(
-                    'https://image.tmdb.org/t/p/w1280${movie.backdropPath}',
-                  ),
-                  fit: BoxFit.cover,
-                ),
+              child: CachedMovieImage(
+                imagePath: movie.backdropPath,
+                fit: BoxFit.cover,
               ),
             ),
             Padding(

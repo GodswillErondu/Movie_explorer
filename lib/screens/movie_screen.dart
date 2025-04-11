@@ -4,6 +4,7 @@ import 'package:movie_explorer_app/models/movie.dart';
 import 'package:movie_explorer_app/screens/movie_details_screen.dart';
 import 'package:movie_explorer_app/services/movie_service.dart';
 import 'package:movie_explorer_app/providers/theme_notifier.dart';
+import 'package:movie_explorer_app/widgets/cached_movie_image.dart';
 import 'package:provider/provider.dart';
 
 class MovieScreen extends StatefulWidget {
@@ -17,13 +18,18 @@ class _MovieScreenState extends State<MovieScreen> {
   late Future<List<Movie>> nowShowingMovies;
   late Future<List<Movie>> popularMovies;
   late Future<List<Movie>> upcomingMovies;
+  late MovieService _movieService;
 
   @override
   void initState() {
-    nowShowingMovies = APIServices().getNowShowingMovies();
-    popularMovies = APIServices().getPopularMovies();
-    upcomingMovies = APIServices().getUpcomingMovies();
     super.initState();
+    // Get the MovieService instance from the provider
+    _movieService = Provider.of<MovieService>(context, listen: false);
+
+    // Initialize the futures using the movie service
+    nowShowingMovies = _movieService.getNowShowingMovies();
+    popularMovies = _movieService.getPopularMovies();
+    upcomingMovies = _movieService.getUpcomingMovies();
   }
 
   @override
@@ -108,15 +114,15 @@ class _MovieScreenState extends State<MovieScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8.0),
                         ),
-                        child: Image.network(
-                          'https://image.tmdb.org/t/p/w500${movie.backdropPath}',
+                        child: CachedMovieImage(
+                          imagePath: movie.backdropPath,
                           fit: BoxFit.cover,
                         ),
                       ),
                     );
                   },
                   options: CarouselOptions(
-                    autoPlay: true,
+                    autoPlay: false,
                     enlargeCenterPage: true,
                     aspectRatio: 1.4,
                     autoPlayInterval: const Duration(seconds: 3),
@@ -167,8 +173,8 @@ class _MovieScreenState extends State<MovieScreen> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16.0),
-                            child: Image.network(
-                              'https://image.tmdb.org/t/p/w500${movie.backdropPath}',
+                            child: CachedMovieImage(
+                              imagePath: movie.backdropPath,
                               height: 120,
                               width: double.infinity,
                               fit: BoxFit.cover,
@@ -221,8 +227,8 @@ class _MovieScreenState extends State<MovieScreen> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16.0),
-                            child: Image.network(
-                              'https://image.tmdb.org/t/p/w500${movie.backdropPath}',
+                            child: CachedMovieImage(
+                              imagePath: movie.backdropPath,
                               height: 120,
                               width: double.infinity,
                               fit: BoxFit.cover,

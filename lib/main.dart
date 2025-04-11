@@ -4,12 +4,31 @@ import 'package:movie_explorer_app/screens/movie_screen.dart';
 import 'package:movie_explorer_app/theme/theme.dart';
 import 'package:movie_explorer_app/providers/theme_notifier.dart';
 import 'package:provider/provider.dart';
+import 'package:movie_explorer_app/services/cache_service.dart';
+import 'package:movie_explorer_app/services/movie_service.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   await dotenv.load(fileName: '.env');
+  final cacheService = await CacheService.initialize();
+  final movieService = MovieService(cacheService);
+
+  // Add this to handle app termination
+  WidgetsBinding.instance.addObserver(
+    LifecycleEventHandler(
+      detached: () async {
+        await cacheService.dispose();
+      },
+    ),
+  );
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeNotifier(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeNotifier()),
+        Provider.value(value: movieService),
+      ],
       child: const MyApp(),
     ),
   );
@@ -31,5 +50,27 @@ class MyApp extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+// Add this class to handle lifecycle events
+class LifecycleEventHandler extends WidgetsBindingObserver {
+  final Future<void> Function()? detached;
+
+  LifecycleEventHandler({
+    this.detached,
+  });
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.detached:
+        if (detached != null) {
+          await detached!();
+        }
+        break;
+      default:
+        break;
+    }
   }
 }
