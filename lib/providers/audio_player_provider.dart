@@ -10,15 +10,18 @@ class AudioPlayerProvider extends ChangeNotifier {
   bool _isPlaying = false;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
+  double _progress = 0.0;
 
   AudioPlayer get audioPlayer => _audioPlayer;
   List<Song> get playlist => _playlist;
   int get currentIndex => _currentIndex;
-  Song? get currentSong => _playlist.isNotEmpty ? _playlist[_currentIndex] : null;
+  Song? get currentSong =>
+      _playlist.isNotEmpty ? _playlist[_currentIndex] : null;
   bool get isPlayerVisible => _isPlayerVisible;
   bool get isPlaying => _isPlaying;
   Duration get position => _position;
   Duration get duration => _duration;
+  double get progress => _progress;
 
   AudioPlayerProvider() {
     // Listen to player state changes
@@ -30,12 +33,14 @@ class AudioPlayerProvider extends ChangeNotifier {
     // Listen to position changes
     _audioPlayer.positionStream.listen((position) {
       _position = position;
+      updateProgress(position, _duration);
       notifyListeners();
     });
 
     // Listen to duration changes
     _audioPlayer.durationStream.listen((duration) {
       _duration = duration ?? Duration.zero;
+      updateProgress(_position, _duration);
       notifyListeners();
     });
 
@@ -54,7 +59,9 @@ class AudioPlayerProvider extends ChangeNotifier {
 
     // Create a list of AudioSources from the songs
     final playlist = ConcatenatingAudioSource(
-      children: songs.map((song) => AudioSource.uri(Uri.parse(song.audioUrl))).toList(),
+      children: songs
+          .map((song) => AudioSource.uri(Uri.parse(song.audioUrl)))
+          .toList(),
     );
 
     // Set the playlist
@@ -103,6 +110,13 @@ class AudioPlayerProvider extends ChangeNotifier {
   void showPlayer() {
     _isPlayerVisible = true;
     notifyListeners();
+  }
+
+  void updateProgress(Duration position, Duration duration) {
+    if (duration.inMilliseconds > 0) {
+      _progress = position.inMilliseconds / duration.inMilliseconds;
+      notifyListeners();
+    }
   }
 
   @override

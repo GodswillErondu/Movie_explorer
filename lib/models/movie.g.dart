@@ -20,19 +20,22 @@ class MovieAdapter extends TypeAdapter<Movie> {
       title: fields[0] as String,
       backdropPath: fields[1] as String,
       overview: fields[2] as String,
+      id: fields[3] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Movie obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
       ..write(obj.backdropPath)
       ..writeByte(2)
-      ..write(obj.overview);
+      ..write(obj.overview)
+      ..writeByte(3)
+      ..write(obj.id);
   }
 
   @override

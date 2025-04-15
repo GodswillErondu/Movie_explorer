@@ -11,6 +11,33 @@ class MovieService {
 
   MovieService(this._cacheService);
 
+  Future<Movie?> getMovieById(String id) async {
+    try {
+      // First check cache
+      final cached = await _cacheService.getMovieById(id);
+      if (cached != null) return cached;
+
+      // If not in cache, fetch from API
+      final response = await http
+          .get(
+            Uri.parse("${AppConstants.apiBaseUrl}/movie/$id?api_key=$_apiKey"),
+          )
+          .timeout(AppConstants.apiTimeout);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final movie = Movie.fromMap(data);
+        // Cache the fetched movie
+        await _cacheService.cacheMovie(movie);
+        return movie;
+      } else {
+        throw Exception('Failed to load movie with ID: $id');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<List<Movie>> getNowShowingMovies() async {
     try {
       final cached =
@@ -86,5 +113,14 @@ class MovieService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  List<Movie> _mapMoviesFromResponse(Map<String, dynamic> response) {
+    final List<dynamic> results = response['results'] ?? [];
+    return results.map((movieData) {
+      final movie = Movie.fromMap(movieData);
+      assert(movie.id != 0, 'Movie ID should not be 0');
+      return movie;
+    }).toList();
   }
 }

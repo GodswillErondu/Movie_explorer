@@ -1,67 +1,80 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:movie_explorer_app/models/movie.dart';
+import 'package:movie_explorer_app/services/movie_service.dart';
 import 'package:movie_explorer_app/widgets/cached_movie_image.dart';
+import 'package:provider/provider.dart';
 
 class MovieDetailsScreen extends StatelessWidget {
-  final Movie movie;
+  final String movieId;
 
-  const MovieDetailsScreen({super.key, required this.movie});
+  const MovieDetailsScreen({super.key, required this.movieId});
 
   @override
   Widget build(BuildContext context) {
+    final movieService = Provider.of<MovieService>(context, listen: false);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(movie.title),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              height: 250,
-              child: CachedMovieImage(
-                imagePath: movie.backdropPath,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Movie Title
-                  Text(
-                    movie.title,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 24,
-                        ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Overview Header
-                  Text(
-                    'Overview',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Movie Description
-                  Text(
-                    movie.overview,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          height: 1.5,
-                          fontSize: 16,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/'),
         ),
+      ),
+      body: FutureBuilder<Movie?>(
+        future: movieService.getMovieById(movieId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final movie = snapshot.data;
+          if (movie == null) {
+            return const Center(child: Text('Movie not found'));
+          }
+
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CachedMovieImage(
+                  imagePath: movie.backdropPath,
+                  width: double.infinity,
+                  height: 400,
+                  fit: BoxFit.cover,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        movie.title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        movie.overview,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              height: 1.5,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

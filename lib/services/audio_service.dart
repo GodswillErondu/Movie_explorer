@@ -11,39 +11,43 @@ class AudioService {
   final String _clientId;
 
   AudioService(this._cacheService)
-      : _apiBaseUrl = dotenv.get('JAMENDO_BASE_URL'),
+      : _apiBaseUrl = dotenv.get('JAMENDO_BASE_URL',
+            fallback: 'https://api.jamendo.com/v3.0'),
         _clientId = dotenv.get('JAMENDO_CLIENT_ID');
 
   Future<List<Song>> getSongs() async {
     try {
       final cached = _cacheService.getCachedSongs();
-      if (cached != null) return cached;
+      if (cached != null && cached.isNotEmpty) {
+        return cached;
+      }
 
-      final response = await http
-          .get(
-            Uri.parse(
-              "$_apiBaseUrl/tracks/?client_id=$_clientId&format=json&limit=20&include=musicinfo&boost=popularity",
-            ),
-          )
-          .timeout(AppConstants.apiTimeout);
+      final url = Uri.parse(
+          "$_apiBaseUrl/tracks/?client_id=$_clientId&format=json&limit=20&include=musicinfo&boost=popularity_total");
+
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        if (data['headers']['status'] == 'success' && data['results'] != null) {
-          final List<dynamic> tracksData = data['results'];
-          final songs =
-              tracksData.map((track) => _mapTrackToSong(track)).toList();
-          await _cacheService.cacheSongs(songs);
-          return songs;
-        } else {
-          throw Exception('Failed to parse song data from API');
+        if (data['headers']['status'] == 'failed') {
+          return _getMockSongs();
         }
+
+        final List<dynamic> tracksData = data['results'] as List<dynamic>;
+
+        if (tracksData.isEmpty) {
+          return _getMockSongs();
+        }
+
+        final songs =
+            tracksData.map((track) => _mapTrackToSong(track)).toList();
+        await _cacheService.cacheSongs(songs);
+        return songs;
       } else {
-        throw Exception('Failed to load songs: ${response.statusCode}');
+        return _getMockSongs();
       }
-    } catch (e) {
-      print('Error fetching songs: $e');
+    } catch (e, stackTrace) {
       return _getMockSongs();
     }
   }
@@ -63,28 +67,30 @@ class AudioService {
   // Search for songs by query
   Future<List<Song>> searchSongs(String query) async {
     try {
-      final response = await http
-          .get(
-            Uri.parse(
-              "$_apiBaseUrl/tracks/?client_id=$_clientId&format=json&limit=20&search=$query&include=musicinfo",
-            ),
-          )
-          .timeout(AppConstants.apiTimeout);
+      final url = Uri.parse(
+          "$_apiBaseUrl/tracks/?client_id=$_clientId&format=json&limit=20&search=$query&include=musicinfo");
+
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        final List<dynamic> tracksData =
+            (data['results'] as List<dynamic>?) ?? [];
 
-        if (data['headers']['status'] == 'success' && data['results'] != null) {
-          final List<dynamic> tracksData = data['results'];
-          return tracksData.map((track) => _mapTrackToSong(track)).toList();
-        } else {
-          throw Exception('Failed to parse search results from API');
-        }
+        return tracksData
+            .map((track) => Song(
+                  id: int.parse(track['id']?.toString() ?? '0'),
+                  title: track['name'] as String? ?? 'Unknown Title',
+                  artist: track['artist_name'] as String? ?? 'Unknown Artist',
+                  albumArt: track['album_image'] as String? ?? '',
+                  audioUrl: track['audio'] as String? ?? '',
+                  duration: int.parse(track['duration']?.toString() ?? '0'),
+                ))
+            .toList();
       } else {
-        throw Exception('Failed to search songs: ${response.statusCode}');
+        return [];
       }
     } catch (e) {
-      print('Error searching songs: $e');
       return [];
     }
   }
@@ -125,7 +131,8 @@ class AudioService {
         id: 1,
         title: "Summer Nights",
         artist: "Electronic Dreams",
-        albumArt: "https://via.placeholder.com/300",
+        albumArt:
+            "https://picsum.photos/300", // Changed from via.placeholder.com
         audioUrl:
             "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
         duration: 240,
@@ -134,7 +141,8 @@ class AudioService {
         id: 2,
         title: "Acoustic Sunrise",
         artist: "Guitar Masters",
-        albumArt: "https://via.placeholder.com/300",
+        albumArt:
+            "https://picsum.photos/300", // Changed from via.placeholder.com
         audioUrl:
             "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
         duration: 185,
@@ -143,28 +151,11 @@ class AudioService {
         id: 3,
         title: "Midnight Jazz",
         artist: "Smooth Saxophones",
-        albumArt: "https://via.placeholder.com/300",
+        albumArt:
+            "https://picsum.photos/300", // Changed from via.placeholder.com
         audioUrl:
             "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-        duration: 320,
-      ),
-      Song(
-        id: 4,
-        title: "Urban Beat",
-        artist: "City Sounds",
-        albumArt: "https://via.placeholder.com/300",
-        audioUrl:
-            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-        duration: 198,
-      ),
-      Song(
-        id: 5,
-        title: "Peaceful Piano",
-        artist: "Classical Notes",
-        albumArt: "https://via.placeholder.com/300",
-        audioUrl:
-            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-        duration: 274,
+        duration: 210,
       ),
     ];
   }

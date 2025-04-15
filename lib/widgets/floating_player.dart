@@ -38,7 +38,6 @@ class FloatingPlayer extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Progress bar
                 SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
@@ -58,7 +57,6 @@ class FloatingPlayer extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: Row(
                     children: [
-                      // Album art
                       ClipRRect(
                         borderRadius: BorderRadius.circular(4),
                         child: CachedNetworkImage(

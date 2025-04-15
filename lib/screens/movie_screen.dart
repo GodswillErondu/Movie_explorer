@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:movie_explorer_app/models/movie.dart';
 import 'package:movie_explorer_app/screens/movie_details_screen.dart';
 import 'package:movie_explorer_app/services/movie_service.dart';
@@ -101,24 +102,21 @@ class _MovieScreenState extends State<MovieScreen> {
                   itemBuilder: (context, index, movieIndex) {
                     final movie = movies[index];
                     return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                MovieDetailsScreen(movie: movie),
+                      onTap: () => context.go('/details/${movie.id}'),
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: CachedMovieImage(
+                              imagePath: movie.backdropPath,
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                        );
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: CachedMovieImage(
-                          imagePath: movie.backdropPath,
-                          fit: BoxFit.cover,
-                        ),
+
+                        ],
                       ),
                     );
                   },
@@ -156,15 +154,7 @@ class _MovieScreenState extends State<MovieScreen> {
                     itemBuilder: (context, index) {
                       final movie = movies[index];
                       return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  MovieDetailsScreen(movie: movie),
-                            ),
-                          );
-                        },
+                        onTap: () => context.go('/details/${movie.id}'),
                         child: Container(
                           width: 150.0,
                           margin: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -173,10 +163,12 @@ class _MovieScreenState extends State<MovieScreen> {
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16.0),
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(16.0)),
                             child: CachedMovieImage(
                               imagePath: movie.backdropPath,
-                              height: 120,
+                              height:
+                                  200,
                               width: double.infinity,
                               fit: BoxFit.cover,
                             ),
@@ -210,15 +202,7 @@ class _MovieScreenState extends State<MovieScreen> {
                     itemBuilder: (context, index) {
                       final movie = movies[index];
                       return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  MovieDetailsScreen(movie: movie),
-                            ),
-                          );
-                        },
+                        onTap: () => context.go('/details/${movie.id}'),
                         child: Container(
                           width: 150.0,
                           margin: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -227,10 +211,12 @@ class _MovieScreenState extends State<MovieScreen> {
                             borderRadius: BorderRadius.circular(16.0),
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16.0),
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(16.0)),
                             child: CachedMovieImage(
                               imagePath: movie.backdropPath,
-                              height: 120,
+                              height:
+                                  200, // Increased height since we removed the text
                               width: double.infinity,
                               fit: BoxFit.cover,
                             ),
