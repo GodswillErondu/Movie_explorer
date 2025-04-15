@@ -23,8 +23,8 @@ class MiniPlayer extends StatelessWidget {
 
         return GestureDetector(
           onTap: () {
-            // Use GoRouter to navigate to audio screen
-            context.go('/audio/browse');
+            // Updated route name to match the new screen name
+            context.push('/audio/browse/player');
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),

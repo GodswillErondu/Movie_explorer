@@ -79,7 +79,15 @@ class AudioPlayerProvider extends ChangeNotifier {
   }
 
   void seek(Duration position) {
+    if (position < Duration.zero) {
+      position = Duration.zero;
+    } else if (position > _duration) {
+      position = _duration;
+    }
     _audioPlayer.seek(position);
+    _position = position;
+    updateProgress(_position, _duration);
+    notifyListeners();
   }
 
   void playNext() {

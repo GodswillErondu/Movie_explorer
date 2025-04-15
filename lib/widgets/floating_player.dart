@@ -7,11 +7,19 @@ import 'package:cached_network_image/cached_network_image.dart';
 class FloatingPlayer extends StatelessWidget {
   const FloatingPlayer({Key? key}) : super(key: key);
 
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return '$minutes:$seconds';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AudioPlayerProvider>(
       builder: (context, audioPlayerProvider, child) {
-        if (!audioPlayerProvider.isPlayerVisible || audioPlayerProvider.currentSong == null) {
+        if (!audioPlayerProvider.isPlayerVisible ||
+            audioPlayerProvider.currentSong == null) {
           return const SizedBox.shrink();
         }
 
@@ -38,23 +46,57 @@ class FloatingPlayer extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Duration display with padding
+                Padding(
+                  padding:
+                      const EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _formatDuration(position),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).textTheme.bodySmall?.color,
+                        ),
+                      ),
+                      Text(
+                        _formatDuration(duration),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).textTheme.bodySmall?.color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Slider
                 SliderTheme(
                   data: SliderTheme.of(context).copyWith(
-                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                    thumbShape:
+                        const RoundSliderThumbShape(enabledThumbRadius: 6),
+                    overlayShape:
+                        const RoundSliderOverlayShape(overlayRadius: 12),
                     trackHeight: 2,
                   ),
                   child: Slider(
-                    value: position.inSeconds.toDouble(),
+                    value: duration.inSeconds > 0
+                        ? position.inSeconds.toDouble()
+                        : 0.0,
                     min: 0,
-                    max: duration.inSeconds.toDouble(),
+                    max: duration.inSeconds > 0
+                        ? duration.inSeconds.toDouble()
+                        : 1.0,
                     onChanged: (value) {
-                      audioPlayerProvider.seek(Duration(seconds: value.toInt()));
+                      final seekPosition = Duration(seconds: value.toInt());
+                      audioPlayerProvider.seek(seekPosition);
                     },
-                  ),
+                  )
                 ),
+                // Player controls
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
                   child: Row(
                     children: [
                       ClipRRect(
@@ -79,27 +121,25 @@ class FloatingPlayer extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // Song info
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               song.title,
-                              // style: Theme.of(context).textTheme.subtitle1,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             Text(
                               song.artist,
-                              // style: Theme.of(context).textTheme.caption,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ],
                         ),
                       ),
-                      // Controls
                       IconButton(
                         icon: const Icon(Icons.skip_previous),
                         onPressed: audioPlayerProvider.playPrevious,
