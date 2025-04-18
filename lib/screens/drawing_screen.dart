@@ -44,13 +44,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
           'Draw Your Dream',
           style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Theme.of(context).appBarTheme.iconTheme?.color,
-          ),
-          onPressed: () => context.go('/'),
-        ),
       ),
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
       body: Column(
