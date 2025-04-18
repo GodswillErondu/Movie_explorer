@@ -14,16 +14,24 @@ class _DrawingScreenState extends State<DrawingScreen> {
   List<Stroke> _strokes = [];
   List<Stroke> _redoStrokes = [];
   List<Offset> _currentPoints = [];
-  late Color _selectedColor; // Remove the initial value
+  late Color _selectedColor;
   double _brushSize = 4.0;
+  bool _isEraser = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Set the initial color based on theme
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     _selectedColor = isDarkMode ? Colors.white : Colors.black;
   }
+
+  Color _getEraseColor() {
+    return Theme.of(context).brightness == Brightness.dark
+        ? Colors.black
+        : Colors.white;
+  }
+
+  Color get _effectiveColor => _isEraser ? _getEraseColor() : _selectedColor;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +61,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   _strokes.add(
                     Stroke(
                       points: List.from(_currentPoints),
-                      color: _selectedColor,
+                      color: _effectiveColor, // Use effective color here
                       brushSize: _brushSize,
                     ),
                   );
@@ -65,7 +73,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                 painter: DrawPainter(
                   strokes: _strokes,
                   currentPoints: _currentPoints,
-                  currentColor: _selectedColor,
+                  currentColor: _effectiveColor, // Use effective color here
                   currentBrushSize: _brushSize,
                 ),
                 size: Size.infinite,
@@ -79,34 +87,57 @@ class _DrawingScreenState extends State<DrawingScreen> {
   }
 
   Widget _buildToolBar() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final toolbarPadding = (screenWidth * 0.04).clamp(8.0, 24.0);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(
+          horizontal: toolbarPadding, vertical: toolbarPadding * 0.5),
       color: Colors.grey[200],
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // undo button
-          IconButton(
-            onPressed: _strokes.isNotEmpty
-                ? () {
-                    setState(() {
-                      _redoStrokes.add(_strokes.removeLast());
-                    });
-                  }
-                : null,
-            icon: const Icon(Icons.undo),
-          ),
+          Row(
+            children: [
+              // undo button
+              IconButton(
+                onPressed: _strokes.isNotEmpty
+                    ? () {
+                        setState(() {
+                          _redoStrokes.add(_strokes.removeLast());
+                        });
+                      }
+                    : null,
+                icon: const Icon(Icons.undo),
+                iconSize: (screenWidth * 0.06).clamp(20.0, 32.0),
+              ),
 
-          // redo button
-          IconButton(
-            onPressed: _redoStrokes.isNotEmpty
-                ? () {
-                    setState(() {
-                      _strokes.add(_redoStrokes.removeLast());
-                    });
-                  }
-                : null,
-            icon: const Icon(Icons.redo),
+              // redo button
+              IconButton(
+                onPressed: _redoStrokes.isNotEmpty
+                    ? () {
+                        setState(() {
+                          _strokes.add(_redoStrokes.removeLast());
+                        });
+                      }
+                    : null,
+                icon: const Icon(Icons.redo),
+                iconSize: (screenWidth * 0.06).clamp(20.0, 32.0),
+              ),
+
+              // eraser button
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isEraser = !_isEraser;
+                  });
+                },
+                icon: const Icon(Icons.auto_fix_normal),
+                color: _isEraser ? Colors.blue : null,
+                iconSize: (screenWidth * 0.06).clamp(20.0, 32.0),
+              ),
+            ],
           ),
 
           DropdownButton(
@@ -114,15 +145,27 @@ class _DrawingScreenState extends State<DrawingScreen> {
             items: [
               DropdownMenuItem(
                 value: 4.0,
-                child: Text('Small'),
+                child: Text(
+                  'Small',
+                  style: TextStyle(
+                      fontSize: (screenWidth * 0.035).clamp(12.0, 18.0)),
+                ),
               ),
               DropdownMenuItem(
                 value: 8.0,
-                child: Text('Medium'),
+                child: Text(
+                  'Medium',
+                  style: TextStyle(
+                      fontSize: (screenWidth * 0.035).clamp(12.0, 18.0)),
+                ),
               ),
               DropdownMenuItem(
                 value: 12.0,
-                child: Text('Large'),
+                child: Text(
+                  'Large',
+                  style: TextStyle(
+                      fontSize: (screenWidth * 0.035).clamp(12.0, 18.0)),
+                ),
               ),
             ],
             onChanged: (value) {
@@ -148,26 +191,64 @@ class _DrawingScreenState extends State<DrawingScreen> {
   }
 
   Widget _buildColorButton(Color color) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final borderColor = isDarkMode ? Colors.white : Colors.black;
+
+    // Get screen width
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Calculate button size based on screen width
+    // Use clamp to set min and max sizes
+    final buttonSize = (screenWidth * 0.06).clamp(20.0, 32.0);
+    final borderWidth = (screenWidth * 0.005).clamp(1.5, 3.0);
+    final marginSize = (screenWidth * 0.01).clamp(2.0, 6.0);
+
+    // Determine if this color button should be visible based on theme
+    final isColorVisible = !((isDarkMode && color == Colors.black) ||
+        (!isDarkMode && color == Colors.white));
+
+    if (!isColorVisible) {
+      return const SizedBox.shrink();
+    }
+
     return GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedColor = color;
-          });
-        },
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4.0),
-          width: 20.0,
-          height: 20.0,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            border: Border.all(
-              color:
-                  _selectedColor == color ? Colors.black : Colors.transparent,
-              width: 2.0,
-            ),
+      onTap: () {
+        setState(() {
+          _selectedColor = color;
+          _isEraser = false; // Turn off eraser when selecting a color
+        });
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: marginSize),
+        width: buttonSize,
+        height: buttonSize,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: (_selectedColor == color && !_isEraser)
+                ? borderColor
+                : Colors.grey.withOpacity(0.3),
+            width: borderWidth,
           ),
-        ));
+          // Add subtle shadow for better visibility
+          boxShadow: [
+            if (color == Colors.white && !isDarkMode)
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: buttonSize * 0.08,
+                spreadRadius: buttonSize * 0.04,
+              ),
+            if (color == Colors.black && isDarkMode)
+              BoxShadow(
+                color: Colors.white.withOpacity(0.1),
+                blurRadius: buttonSize * 0.08,
+                spreadRadius: buttonSize * 0.04,
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
