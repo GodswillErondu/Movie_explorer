@@ -21,6 +21,11 @@ class _MovieScreenState extends State<MovieScreen> {
   late Future<List<Movie>> upcomingMovies;
   late MovieService _movieService;
 
+  // Add counters for each section
+  int nowShowingCount = 10;
+  int popularCount = 10;
+  int upcomingCount = 10;
+
   @override
   void initState() {
     super.initState();
@@ -80,160 +85,93 @@ class _MovieScreenState extends State<MovieScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Text('Now Showing',
-                  style: Theme.of(context).textTheme.titleLarge),
-            ),
-            FutureBuilder<List<Movie>>(
-              future: nowShowingMovies,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+      body: ListView(
+        children: [
+          _buildMovieSection('Now Showing', nowShowingMovies, nowShowingCount,
+              () => setState(() => nowShowingCount += 10)),
+          _buildMovieSection('Popular', popularMovies, popularCount,
+              () => setState(() => popularCount += 10)),
+          _buildMovieSection('Upcoming', upcomingMovies, upcomingCount,
+              () => setState(() => upcomingCount += 10)),
+        ],
+      ),
+    );
+  }
 
-                if (snapshot.hasError) {
-                  return const Center(child: Text('Error loading movies'));
-                }
+  Widget _buildMovieSection(String title, Future<List<Movie>> movies,
+      int itemCount, VoidCallback onLoadMore) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ),
+        FutureBuilder<List<Movie>>(
+          future: movies,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-                final movies = snapshot.data ?? [];
+            if (snapshot.hasError) {
+              return const Center(child: Text('Error loading movies'));
+            }
 
-                return CarouselSlider.builder(
-                  itemCount: movies.length,
-                  itemBuilder: (context, index, movieIndex) {
-                    final movie = movies[index];
+            final moviesList = snapshot.data ?? [];
+            final displayedMovies = moviesList.take(itemCount).toList();
+            final hasMore = moviesList.length > itemCount;
+
+            return Column(
+              children: [
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.75,
+                    crossAxisSpacing: 16.0,
+                    mainAxisSpacing: 16.0,
+                  ),
+                  itemCount: displayedMovies.length,
+                  itemBuilder: (context, index) {
+                    final movie = displayedMovies[index];
                     return GestureDetector(
                       onTap: () => context.go('/details/${movie.id}'),
-                      child: Stack(
-                        children: [
-                          Container(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardTheme.color,
+                          borderRadius: BorderRadius.circular(16.0),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16.0),
+                          child: CachedMovieImage(
+                            imagePath: movie.backdropPath,
                             width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: CachedMovieImage(
-                              imagePath: movie.backdropPath,
-                              fit: BoxFit.cover,
-                            ),
+                            fit: BoxFit.cover,
                           ),
-                        ],
+                        ),
                       ),
                     );
                   },
-                  options: CarouselOptions(
-                    autoPlay: false,
-                    enlargeCenterPage: true,
-                    aspectRatio: 1.4,
-                    autoPlayInterval: const Duration(seconds: 3),
+                ),
+                if (hasMore)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ElevatedButton(
+                      onPressed: onLoadMore,
+                      child: const Text('Load More'),
+                    ),
                   ),
-                );
-              },
-            ),
-            const SizedBox(
-              height: 4.0,
-            ),
-            Text('Popular Movies',
-                style: Theme.of(context).textTheme.titleLarge),
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 20),
-              height: 200,
-              child: FutureBuilder(
-                future: popularMovies,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading movies'));
-                  }
-                  final movies = snapshot.data ?? [];
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: movies.length,
-                    itemBuilder: (context, index) {
-                      final movie = movies[index];
-                      return GestureDetector(
-                        onTap: () => context.go('/details/${movie.id}'),
-                        child: Container(
-                          width: 150.0,
-                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardTheme.color,
-                            borderRadius: BorderRadius.circular(16.0),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(16.0)),
-                            child: CachedMovieImage(
-                              imagePath: movie.backdropPath,
-                              height: 200,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            Text('Upcoming Movies',
-                style: Theme.of(context).textTheme.titleLarge),
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 20),
-              height: 200,
-              child: FutureBuilder(
-                future: upcomingMovies,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (snapshot.hasError) {
-                    return const Center(child: Text('Error loading movies'));
-                  }
-                  final movies = snapshot.data ?? [];
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: movies.length,
-                    itemBuilder: (context, index) {
-                      final movie = movies[index];
-                      return GestureDetector(
-                        onTap: () => context.go('/details/${movie.id}'),
-                        child: Container(
-                          width: 150.0,
-                          margin: const EdgeInsets.symmetric(horizontal: 10.0),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).cardTheme.color,
-                            borderRadius: BorderRadius.circular(16.0),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(16.0)),
-                            child: CachedMovieImage(
-                              imagePath: movie.backdropPath,
-                              height:
-                                  200, // Increased height since we removed the text
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
-      ),
+      ],
     );
   }
 

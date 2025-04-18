@@ -16,32 +16,34 @@ class AudioScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Music Player',
-          style: Theme.of(context).appBarTheme.titleTextStyle,
+          style: theme.appBarTheme.titleTextStyle,
         ),
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        elevation: Theme.of(context).appBarTheme.elevation,
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        elevation: theme.appBarTheme.elevation,
         centerTitle: true,
-        iconTheme: Theme.of(context).appBarTheme.iconTheme,
-        systemOverlayStyle: Theme.of(context).appBarTheme.systemOverlayStyle,
+        iconTheme: theme.appBarTheme.iconTheme,
+        systemOverlayStyle: theme.appBarTheme.systemOverlayStyle,
       ),
       body: Column(
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).navigationBarTheme.backgroundColor,
+              color: theme.navigationBarTheme.backgroundColor,
               border: Border(
                 bottom: BorderSide(
-                  color: Theme.of(context).dividerColor,
+                  color: theme.dividerColor,
                   width: 1.0,
                 ),
               ),
             ),
             child: NavigationBar(
-              height: Theme.of(context).navigationBarTheme.height,
+              height: theme.navigationBarTheme.height,
               backgroundColor: Colors.transparent,
               selectedIndex: _getCurrentIndex(context),
               onDestinationSelected: (index) {
@@ -51,24 +53,33 @@ class AudioScreen extends StatelessWidget {
                 );
               },
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              indicatorColor: theme.colorScheme.primary.withOpacity(0.12),
               destinations: [
                 NavigationDestination(
                   icon: Icon(
                     Icons.browse_gallery,
                     color: _getCurrentIndex(context) == 0
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).unselectedWidgetColor,
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurface.withOpacity(0.64),
                   ),
                   label: 'Browse',
+                  selectedIcon: Icon(
+                    Icons.browse_gallery,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
                 NavigationDestination(
                   icon: Icon(
                     Icons.search,
                     color: _getCurrentIndex(context) == 1
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).unselectedWidgetColor,
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurface.withOpacity(0.64),
                   ),
                   label: 'Search',
+                  selectedIcon: Icon(
+                    Icons.search,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
               ],
             ),
@@ -188,30 +199,16 @@ class _SearchTabState extends State<SearchTab> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search for songs or artists',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  _searchController.clear();
-                  setState(() {
-                    _searchResults = [];
-                    _isSearching = false;
-                  });
-                },
-              ),
-            ),
-            onSubmitted: _performSearch,
-            textInputAction: TextInputAction.search,
-          ),
+        SearchBar(
+          controller: _searchController,
+          onChanged: _performSearch,
+          onClear: () {
+            _searchController.clear();
+            setState(() {
+              _searchResults = [];
+              _isSearching = false;
+            });
+          },
         ),
         Expanded(
           child: _isSearching
@@ -236,6 +233,88 @@ class _SearchTabState extends State<SearchTab> {
                         ),
         ),
       ],
+    );
+  }
+}
+
+class SearchBar extends StatelessWidget {
+  final TextEditingController controller;
+  final Function(String) onChanged;
+  final VoidCallback onClear;
+
+  const SearchBar({
+    Key? key,
+    required this.controller,
+    required this.onChanged,
+    required this.onClear,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
+            width: 1.0,
+          ),
+        ),
+      ),
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        style: theme.textTheme.bodyLarge,
+        decoration: InputDecoration(
+          hintText: 'Search music...',
+          hintStyle: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurface.withOpacity(0.5),
+          ),
+          prefixIcon: Icon(
+            Icons.search,
+            color: theme.colorScheme.onSurface.withOpacity(0.5),
+          ),
+          suffixIcon: controller.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(
+                    Icons.clear,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                  onPressed: onClear,
+                )
+              : null,
+          filled: true,
+          fillColor: isDark
+              ? theme.colorScheme.surface.withOpacity(0.06)
+              : theme.colorScheme.surface.withOpacity(0.04),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: BorderSide(
+              color: theme.colorScheme.onSurface.withOpacity(0.12),
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: BorderSide(
+              color: theme.colorScheme.onSurface.withOpacity(0.12),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: BorderSide(
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              width: 2.0,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 12.0,
+          ),
+        ),
+      ),
     );
   }
 }
