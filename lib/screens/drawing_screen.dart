@@ -14,15 +14,26 @@ class _DrawingScreenState extends State<DrawingScreen> {
   List<Stroke> _strokes = [];
   List<Stroke> _redoStrokes = [];
   List<Offset> _currentPoints = [];
-  Color _selectedColor = Colors.black;
+  late Color _selectedColor; // Remove the initial value
   double _brushSize = 4.0;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Set the initial color based on theme
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    _selectedColor = isDarkMode ? Colors.white : Colors.black;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Draw Your Dream'),
       ),
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       body: Column(
         children: [
           Expanded(
@@ -50,7 +61,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                   _redoStrokes = [];
                 });
               },
-              child:  CustomPaint(
+              child: CustomPaint(
                 painter: DrawPainter(
                   strokes: _strokes,
                   currentPoints: _currentPoints,
@@ -67,7 +78,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
     );
   }
 
-  Widget _buildToolBar(){
+  Widget _buildToolBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       color: Colors.grey[200],
@@ -76,21 +87,27 @@ class _DrawingScreenState extends State<DrawingScreen> {
         children: [
           // undo button
           IconButton(
-            onPressed: _strokes.isNotEmpty ? () {
-              setState(() {
-                _redoStrokes.add(_strokes.removeLast());
-              });
-            } : null,
-            icon: const Icon(Icons.undo),),
+            onPressed: _strokes.isNotEmpty
+                ? () {
+                    setState(() {
+                      _redoStrokes.add(_strokes.removeLast());
+                    });
+                  }
+                : null,
+            icon: const Icon(Icons.undo),
+          ),
 
           // redo button
           IconButton(
-            onPressed: _redoStrokes.isNotEmpty ? () {
-              setState(() {
-                _strokes.add(_redoStrokes.removeLast());
-              });
-            } : null,
-            icon: const Icon(Icons.redo),),
+            onPressed: _redoStrokes.isNotEmpty
+                ? () {
+                    setState(() {
+                      _strokes.add(_redoStrokes.removeLast());
+                    });
+                  }
+                : null,
+            icon: const Icon(Icons.redo),
+          ),
 
           DropdownButton(
             value: _brushSize,
@@ -129,6 +146,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
       ),
     );
   }
+
   Widget _buildColorButton(Color color) {
     return GestureDetector(
         onTap: () {
@@ -144,16 +162,14 @@ class _DrawingScreenState extends State<DrawingScreen> {
             color: color,
             shape: BoxShape.circle,
             border: Border.all(
-              color: _selectedColor == color ? Colors.black : Colors.transparent,
+              color:
+                  _selectedColor == color ? Colors.black : Colors.transparent,
               width: 2.0,
             ),
           ),
-        )
-    );
+        ));
   }
-
 }
-
 
 class DrawPainter extends CustomPainter {
   final List<Stroke> strokes;
@@ -179,7 +195,8 @@ class DrawPainter extends CustomPainter {
         ..strokeWidth = stroke.brushSize;
 
       for (int i = 0; i < stroke.points.length - 1; i++) {
-        if (stroke.points[i] != Offset.zero && stroke.points[i + 1] != Offset.zero) {
+        if (stroke.points[i] != Offset.zero &&
+            stroke.points[i + 1] != Offset.zero) {
           canvas.drawLine(stroke.points[i]!, stroke.points[i + 1]!, paint);
         }
       }
@@ -192,7 +209,8 @@ class DrawPainter extends CustomPainter {
       ..strokeWidth = currentBrushSize;
 
     for (int i = 0; i < currentPoints.length - 1; i++) {
-      if (currentPoints[i] != Offset.zero && currentPoints[i + 1] != Offset.zero) {
+      if (currentPoints[i] != Offset.zero &&
+          currentPoints[i + 1] != Offset.zero) {
         canvas.drawLine(currentPoints[i], currentPoints[i + 1], currentPaint);
       }
     }
