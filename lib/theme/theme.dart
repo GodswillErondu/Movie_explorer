@@ -14,12 +14,25 @@ class AppTheme {
     ),
 
     // AppBar theme
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: ThemeConstants.primaryColor,
       foregroundColor: ThemeConstants.lightTextColor,
       elevation: 0,
       centerTitle: true,
-      systemOverlayStyle: SystemUiOverlayStyle(
+      titleTextStyle: GoogleFonts.roboto(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: ThemeConstants.lightTextColor,
+      ),
+      iconTheme: const IconThemeData(
+        color: ThemeConstants.lightTextColor,
+        size: 24,
+      ),
+      actionsIconTheme: const IconThemeData(
+        color: ThemeConstants.lightTextColor,
+        size: 24,
+      ),
+      systemOverlayStyle: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
       ),
@@ -84,6 +97,48 @@ class AppTheme {
         borderRadius: BorderRadius.circular(ThemeConstants.borderRadius),
       ),
     ),
+
+    // Tab Bar theme
+    tabBarTheme: TabBarTheme(
+      labelStyle: GoogleFonts.roboto(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+      unselectedLabelStyle: GoogleFonts.roboto(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+      ),
+      labelColor: ThemeConstants.primaryColor,
+      unselectedLabelColor: ThemeConstants.lightTextColor.withOpacity(0.7),
+      indicatorSize: TabBarIndicatorSize.tab,
+      indicatorColor: ThemeConstants.primaryColor,
+      dividerColor: Colors.transparent,
+      labelPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+    ),
+
+    // Navigation Bar theme
+    navigationBarTheme: NavigationBarThemeData(
+      height: 65,
+      labelTextStyle: MaterialStateProperty.resolveWith((states) {
+        return GoogleFonts.roboto(
+          fontSize: 14,
+          fontWeight: states.contains(MaterialState.selected)
+              ? FontWeight.w600
+              : FontWeight.w400,
+        );
+      }),
+      iconTheme: MaterialStateProperty.resolveWith((states) {
+        return IconThemeData(
+          size: 24,
+          color: states.contains(MaterialState.selected)
+              ? ThemeConstants.primaryColor
+              : ThemeConstants.lightTextColor.withOpacity(0.7),
+        );
+      }),
+      backgroundColor: ThemeConstants.lightSurfaceColor,
+      indicatorColor: ThemeConstants.primaryColor.withOpacity(0.12),
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+    ),
   );
 
   static ThemeData darkTheme = ThemeData(
@@ -96,12 +151,25 @@ class AppTheme {
     ),
 
     // AppBar theme
-    appBarTheme: const AppBarTheme(
+    appBarTheme: AppBarTheme(
       backgroundColor: ThemeConstants.darkSurfaceColor,
       foregroundColor: ThemeConstants.darkTextColor,
       elevation: 0,
       centerTitle: true,
-      systemOverlayStyle: SystemUiOverlayStyle(
+      titleTextStyle: GoogleFonts.roboto(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: ThemeConstants.darkTextColor,
+      ),
+      iconTheme: const IconThemeData(
+        color: ThemeConstants.darkTextColor,
+        size: 24,
+      ),
+      actionsIconTheme: const IconThemeData(
+        color: ThemeConstants.darkTextColor,
+        size: 24,
+      ),
+      systemOverlayStyle: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
       ),
@@ -165,6 +233,48 @@ class AppTheme {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.borderRadius),
       ),
+    ),
+
+    // Tab Bar theme
+    tabBarTheme: TabBarTheme(
+      labelStyle: GoogleFonts.roboto(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+      unselectedLabelStyle: GoogleFonts.roboto(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+      ),
+      labelColor: ThemeConstants.primaryColor,
+      unselectedLabelColor: ThemeConstants.darkTextColor.withOpacity(0.7),
+      indicatorSize: TabBarIndicatorSize.tab,
+      indicatorColor: ThemeConstants.primaryColor,
+      dividerColor: Colors.transparent,
+      labelPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+    ),
+
+    // Navigation Bar theme
+    navigationBarTheme: NavigationBarThemeData(
+      height: 65,
+      labelTextStyle: MaterialStateProperty.resolveWith((states) {
+        return GoogleFonts.roboto(
+          fontSize: 14,
+          fontWeight: states.contains(MaterialState.selected)
+              ? FontWeight.w600
+              : FontWeight.w400,
+        );
+      }),
+      iconTheme: MaterialStateProperty.resolveWith((states) {
+        return IconThemeData(
+          size: 24,
+          color: states.contains(MaterialState.selected)
+              ? ThemeConstants.primaryColor
+              : ThemeConstants.darkTextColor.withOpacity(0.7),
+        );
+      }),
+      backgroundColor: ThemeConstants.darkSurfaceColor,
+      indicatorColor: ThemeConstants.primaryColor.withOpacity(0.12),
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
     ),
   );
 }

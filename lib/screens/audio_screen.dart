@@ -18,30 +18,60 @@ class AudioScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Music Player'),
-        backgroundColor: Colors.amber,
+        title: Text(
+          'Music Player',
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        elevation: Theme.of(context).appBarTheme.elevation,
+        centerTitle: true,
+        iconTheme: Theme.of(context).appBarTheme.iconTheme,
+        systemOverlayStyle: Theme.of(context).appBarTheme.systemOverlayStyle,
       ),
       body: Column(
         children: [
-          NavigationBar(
-            selectedIndex: _getCurrentIndex(context),
-            onDestinationSelected: (index) {
-              // Replace direct navigation with navigationShell.goBranch
-              navigationShell.goBranch(
-                index,
-                initialLocation: index == 0,
-              );
-            },
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.browse_gallery),
-                label: 'Browse',
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).navigationBarTheme.backgroundColor,
+              border: Border(
+                bottom: BorderSide(
+                  color: Theme.of(context).dividerColor,
+                  width: 1.0,
+                ),
               ),
-              NavigationDestination(
-                icon: Icon(Icons.search),
-                label: 'Search',
-              ),
-            ],
+            ),
+            child: NavigationBar(
+              height: Theme.of(context).navigationBarTheme.height,
+              backgroundColor: Colors.transparent,
+              selectedIndex: _getCurrentIndex(context),
+              onDestinationSelected: (index) {
+                navigationShell.goBranch(
+                  index,
+                  initialLocation: index == 0,
+                );
+              },
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              destinations: [
+                NavigationDestination(
+                  icon: Icon(
+                    Icons.browse_gallery,
+                    color: _getCurrentIndex(context) == 0
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).unselectedWidgetColor,
+                  ),
+                  label: 'Browse',
+                ),
+                NavigationDestination(
+                  icon: Icon(
+                    Icons.search,
+                    color: _getCurrentIndex(context) == 1
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).unselectedWidgetColor,
+                  ),
+                  label: 'Search',
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: navigationShell,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:ui';
 
 import 'package:movie_explorer_app/models/stroke.dart';
@@ -39,7 +40,17 @@ class _DrawingScreenState extends State<DrawingScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Draw Your Dream'),
+        title: Text(
+          'Draw Your Dream',
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).appBarTheme.iconTheme?.color,
+          ),
+          onPressed: () => context.go('/'),
+        ),
       ),
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
       body: Column(
@@ -91,10 +102,29 @@ class _DrawingScreenState extends State<DrawingScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final toolbarPadding = (screenWidth * 0.04).clamp(8.0, 24.0);
 
+    // Use theme-aware colors for better contrast
+    final toolbarColor = isDarkMode
+        ? Theme.of(context).colorScheme.surface.withOpacity(0.9)
+        : Theme.of(context).colorScheme.surface;
+
+    final iconColor = Theme.of(context).colorScheme.onSurface;
+    final accentColor = Theme.of(context).colorScheme.primary;
+
     return Container(
       padding: EdgeInsets.symmetric(
           horizontal: toolbarPadding, vertical: toolbarPadding * 0.5),
-      color: Colors.grey[200],
+      decoration: BoxDecoration(
+        color: toolbarColor,
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -109,7 +139,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                         });
                       }
                     : null,
-                icon: const Icon(Icons.undo),
+                icon: Icon(Icons.undo, color: iconColor),
                 iconSize: (screenWidth * 0.06).clamp(20.0, 32.0),
               ),
 
@@ -122,7 +152,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
                         });
                       }
                     : null,
-                icon: const Icon(Icons.redo),
+                icon: Icon(Icons.redo, color: iconColor),
                 iconSize: (screenWidth * 0.06).clamp(20.0, 32.0),
               ),
 
@@ -133,46 +163,71 @@ class _DrawingScreenState extends State<DrawingScreen> {
                     _isEraser = !_isEraser;
                   });
                 },
-                icon: const Icon(Icons.auto_fix_normal),
-                color: _isEraser ? Colors.blue : null,
+                icon: Icon(
+                  Icons.auto_fix_normal,
+                  color: _isEraser ? accentColor : iconColor,
+                ),
                 iconSize: (screenWidth * 0.06).clamp(20.0, 32.0),
               ),
             ],
           ),
 
-          DropdownButton(
-            value: _brushSize,
-            items: [
-              DropdownMenuItem(
-                value: 4.0,
-                child: Text(
-                  'Small',
-                  style: TextStyle(
-                      fontSize: (screenWidth * 0.035).clamp(12.0, 18.0)),
+          Theme(
+            // Override dropdown theme for better visibility
+            data: Theme.of(context).copyWith(
+              dropdownMenuTheme: DropdownMenuThemeData(
+                textStyle: TextStyle(
+                  color: iconColor,
+                  fontSize: (screenWidth * 0.035).clamp(12.0, 18.0),
                 ),
               ),
-              DropdownMenuItem(
-                value: 8.0,
-                child: Text(
-                  'Medium',
-                  style: TextStyle(
-                      fontSize: (screenWidth * 0.035).clamp(12.0, 18.0)),
-                ),
+            ),
+            child: DropdownButton(
+              value: _brushSize,
+              dropdownColor: toolbarColor,
+              icon: Icon(Icons.arrow_drop_down, color: iconColor),
+              underline: Container(
+                height: 2,
+                color: accentColor,
               ),
-              DropdownMenuItem(
-                value: 12.0,
-                child: Text(
-                  'Large',
-                  style: TextStyle(
-                      fontSize: (screenWidth * 0.035).clamp(12.0, 18.0)),
+              items: [
+                DropdownMenuItem(
+                  value: 4.0,
+                  child: Text(
+                    'Small',
+                    style: TextStyle(
+                      color: iconColor,
+                      fontSize: (screenWidth * 0.035).clamp(12.0, 18.0),
+                    ),
+                  ),
                 ),
-              ),
-            ],
-            onChanged: (value) {
-              setState(() {
-                _brushSize = value!;
-              });
-            },
+                DropdownMenuItem(
+                  value: 8.0,
+                  child: Text(
+                    'Medium',
+                    style: TextStyle(
+                      color: iconColor,
+                      fontSize: (screenWidth * 0.035).clamp(12.0, 18.0),
+                    ),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 12.0,
+                  child: Text(
+                    'Large',
+                    style: TextStyle(
+                      color: iconColor,
+                      fontSize: (screenWidth * 0.035).clamp(12.0, 18.0),
+                    ),
+                  ),
+                ),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _brushSize = value!;
+                });
+              },
+            ),
           ),
 
           // Color picker

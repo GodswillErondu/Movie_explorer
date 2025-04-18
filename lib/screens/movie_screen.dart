@@ -38,13 +38,18 @@ class _MovieScreenState extends State<MovieScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Movie Explorer'),
-        backgroundColor: Colors.amber,
+        title: Text(
+          'Movie Explorer',
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),
         actions: <Widget>[
           Consumer<ThemeNotifier>(
             builder: (context, themeNotifier, child) {
               return PopupMenuButton<ThemeModeOption>(
-                icon: Icon(themeNotifier.currentIcon),
+                icon: Icon(
+                  themeNotifier.currentIcon,
+                  color: Theme.of(context).appBarTheme.actionsIconTheme?.color,
+                ),
                 offset: const Offset(0, 40),
                 itemBuilder: (BuildContext context) => [
                   _buildThemeMenuItem(
@@ -115,7 +120,6 @@ class _MovieScreenState extends State<MovieScreen> {
                               fit: BoxFit.cover,
                             ),
                           ),
-
                         ],
                       ),
                     );
@@ -167,8 +171,7 @@ class _MovieScreenState extends State<MovieScreen> {
                                 top: Radius.circular(16.0)),
                             child: CachedMovieImage(
                               imagePath: movie.backdropPath,
-                              height:
-                                  200,
+                              height: 200,
                               width: double.infinity,
                               fit: BoxFit.cover,
                             ),
@@ -291,12 +294,13 @@ class _MovieScreenState extends State<MovieScreen> {
           ],
         ),
         backgroundColor: isDark ? Colors.grey[850] : Colors.grey[200],
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 3), // Increased from 2 to 3 seconds
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.all(8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
+        elevation: 6.0, // Added elevation for more prominence
         action: SnackBarAction(
           label: 'DISMISS',
           textColor: Theme.of(context).colorScheme.primary,
