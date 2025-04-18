@@ -50,6 +50,10 @@ class ScaffoldWithNavigationBar extends StatelessWidget {
             icon: Icon(Icons.music_note),
             label: 'Music',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.draw),
+            label: 'Draw',
+          ),
         ],
       ),
     );

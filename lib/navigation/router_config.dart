@@ -4,6 +4,7 @@ import 'package:movie_explorer_app/screens/audio_screen.dart';
 import 'package:movie_explorer_app/screens/movie_screen.dart';
 import 'package:movie_explorer_app/screens/movie_details_screen.dart';
 import 'package:movie_explorer_app/screens/audio_player_screen.dart';
+import 'package:movie_explorer_app/screens/drawing_screen.dart';
 import 'package:movie_explorer_app/widgets/scaffold_with_navigation_bar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -78,6 +79,14 @@ final routerConfig = GoRouter(
                   ],
                 ),
               ],
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/drawing',
+              builder: (context, state) => const DrawingScreen(),
             ),
           ],
         ),
