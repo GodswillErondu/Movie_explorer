@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:movie_explorer_app/screens/audio_screen.dart';
+import 'package:movie_explorer_app/screens/drawing_recognition_screen.dart';
 import 'package:movie_explorer_app/screens/movie_screen.dart';
 import 'package:movie_explorer_app/screens/movie_details_screen.dart';
 import 'package:movie_explorer_app/screens/audio_player_screen.dart';
@@ -87,6 +88,14 @@ final routerConfig = GoRouter(
             GoRoute(
               path: '/drawing',
               builder: (context, state) => const DrawingScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/recognition',
+              builder: (context, state) => const DrawingRecognitionScreen(),
             ),
           ],
         ),

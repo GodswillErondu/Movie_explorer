@@ -54,6 +54,10 @@ class ScaffoldWithNavigationBar extends StatelessWidget {
             icon: Icon(Icons.draw),
             label: 'Draw',
           ),
+          NavigationDestination(
+            icon: Icon(Icons.text_fields),
+            label: 'Recognize',
+          ),
         ],
       ),
     );
