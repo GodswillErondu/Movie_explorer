@@ -42,15 +42,10 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
 
   @override
   void dispose() {
-    // Close the recognizer
     _digitalInkRecognizer.close();
-
-    // Clean up all stroke-related data
     _ink.strokes.clear();
     _points.clear();
     _undoStack.clear();
-
-    // Call super last
     super.dispose();
   }
 
@@ -60,20 +55,20 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
       if (!modelExists) {
         setState(() {
           _recognizedText = 'Downloading model...';
-          _isProcessing = true; // Add loading state
+          _isProcessing = true;
         });
         await _modelManager.downloadModel('en');
       }
       setState(() {
         _isModelDownloaded = true;
         _recognizedText = 'Ready to recognize';
-        _isProcessing = false; // Clear loading state
+        _isProcessing = false;
       });
     } catch (e) {
       setState(() {
         _isModelDownloaded = false;
         _recognizedText = 'Error with model: ${e.toString()}';
-        _isProcessing = false; // Clear loading state
+        _isProcessing = false;
       });
       print('Model error: ${e.toString()}');
     }
@@ -128,21 +123,27 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Text Recognition'),
+        title: Text(
+          'Text Recognition',
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),
         actions: [
-          // Add undo button
           IconButton(
             icon: const Icon(Icons.undo),
             onPressed: _ink.strokes.isNotEmpty ? _undoLastStroke : null,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           IconButton(
             icon: const Icon(Icons.clear),
             onPressed: _clearPad,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ],
       ),
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       body: Stack(
         children: [
           Column(
@@ -152,8 +153,10 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
                 flex: 2,
                 child: Container(
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    color: Theme.of(context).canvasColor,
+                    border: Border.all(
+                      color: Theme.of(context).dividerColor,
+                    ),
+                    color: isDarkMode ? Colors.black : Colors.white,
                   ),
                   child: GestureDetector(
                     onPanStart: (details) {
@@ -178,12 +181,10 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
                     },
                     onPanEnd: (details) {
                       if (_points.length > 1) {
-                        // Only add stroke if there are enough points
                         final stroke = mlkit.Stroke()..points.addAll(_points);
                         _ink.strokes.add(stroke);
                         _points = [];
-                        _undoStack
-                            .clear(); // Clear undo stack when new stroke is added
+                        _undoStack.clear();
                         _recognizeText();
                       }
                     },
@@ -191,6 +192,7 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
                       painter: DrawingPainter(
                         ink: _ink,
                         points: _points,
+                        isDarkMode: isDarkMode,
                       ),
                       size: Size.infinite,
                     ),
@@ -202,16 +204,24 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
                 height: 100,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
                   border: Border(
                     top: BorderSide(color: Theme.of(context).dividerColor),
                   ),
                 ),
                 child: Center(
                   child: _isProcessing
-                      ? const CircularProgressIndicator()
+                      ? CircularProgressIndicator(
+                          color: Theme.of(context).colorScheme.primary,
+                        )
                       : Text(
                           _recognizedText,
-                          style: Theme.of(context).textTheme.headlineSmall,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                         ),
                 ),
               ),
@@ -219,9 +229,11 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
           ),
           if (_isProcessing)
             Container(
-              color: Colors.black54,
-              child: const Center(
-                child: CircularProgressIndicator(),
+              color: isDarkMode ? Colors.black54 : Colors.white54,
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
         ],
@@ -233,13 +245,18 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
 class DrawingPainter extends CustomPainter {
   final mlkit.Ink ink;
   final List<mlkit.StrokePoint> points;
+  final bool isDarkMode;
 
-  DrawingPainter({required this.ink, required this.points});
+  DrawingPainter({
+    required this.ink,
+    required this.points,
+    required this.isDarkMode,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-      ..color = Colors.black
+      ..color = isDarkMode ? Colors.white : Colors.black
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 4.0;
 
