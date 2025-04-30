@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:movie_explorer_app/models/song.dart';
 import 'package:movie_explorer_app/providers/audio_player_provider.dart';
 import 'package:movie_explorer_app/services/audio_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
@@ -105,7 +106,7 @@ class BrowseTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final audioService = Provider.of<AudioService>(context, listen: false);
     final audioPlayerProvider =
-    Provider.of<AudioPlayerProvider>(context, listen: false);
+        Provider.of<AudioPlayerProvider>(context, listen: false);
 
     return FutureBuilder<List<Song>>(
       future: audioService.getSongs(),
@@ -196,7 +197,7 @@ class _SearchTabState extends State<SearchTab> {
   @override
   Widget build(BuildContext context) {
     final audioPlayerProvider =
-    Provider.of<AudioPlayerProvider>(context, listen: false);
+        Provider.of<AudioPlayerProvider>(context, listen: false);
 
     return Column(
       children: [
@@ -215,23 +216,23 @@ class _SearchTabState extends State<SearchTab> {
           child: _isSearching
               ? const Center(child: CircularProgressIndicator())
               : _searchResults.isEmpty && _searchController.text.isNotEmpty
-              ? const Center(child: Text('No results found'))
-              : _searchResults.isEmpty
-              ? const Center(child: Text('Search for music'))
-              : ListView.builder(
-            itemCount: _searchResults.length,
-            itemBuilder: (context, index) {
-              final song = _searchResults[index];
-              return SongListTile(
-                song: song,
-                onTap: () {
-                  audioPlayerProvider.setPlaylist(_searchResults,
-                      initialIndex: index);
-                  audioPlayerProvider.play();
-                },
-              );
-            },
-          ),
+                  ? const Center(child: Text('No results found'))
+                  : _searchResults.isEmpty
+                      ? const Center(child: Text('Search for music'))
+                      : ListView.builder(
+                          itemCount: _searchResults.length,
+                          itemBuilder: (context, index) {
+                            final song = _searchResults[index];
+                            return SongListTile(
+                              song: song,
+                              onTap: () {
+                                audioPlayerProvider.setPlaylist(_searchResults,
+                                    initialIndex: index);
+                                audioPlayerProvider.play();
+                              },
+                            );
+                          },
+                        ),
         ),
       ],
     );
@@ -264,20 +265,64 @@ class _SearchBarState extends State<SearchBar> {
     _speech = stt.SpeechToText();
   }
 
+  Future<bool> _requestMicrophonePermission() async {
+    final status = await Permission.microphone.request();
+    if (status.isGranted) {
+      return true;
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Microphone permission is required for speech recognition'),
+        ),
+      );
+      return false;
+    }
+  }
+
   void _startListening() async {
-    if (!_isListening) {
-      bool available = await _speech.initialize();
-      if (available) {
+    if (_isListening) return;
+    final hasPermission = await _requestMicrophonePermission();
+    if (!hasPermission) return;
+
+    bool available = await _speech.initialize(
+      onError: (error) {
+        print("Speech-to-Text Error: ${error.errorMsg}");
         setState(() {
-          _isListening = true;
+          _isListening = false;
         });
-        _speech.listen(onResult: (result) {
+      },
+      onStatus: (status) {
+        print("Speech-to-Text Status: $status");
+        if (status == 'notListening') {
           setState(() {
-            widget.controller.text = result.recognizedWords;
-            widget.onChanged(result.recognizedWords);
+            _isListening = false;
           });
-        });
-      }
+        }
+      },
+    );
+
+    if (available) {
+      setState(() {
+        _isListening = true;
+      });
+      await _speech.listen(
+          onResult: (result) {
+            setState(() {
+              widget.controller.text = result.recognizedWords;
+              widget.onChanged(result.recognizedWords);
+            });
+          },
+          listenFor: const Duration(seconds: 30),
+          pauseFor: const Duration(seconds: 3),
+          partialResults: true,
+          localeId: 'en_US');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Speech recognition not available on this device'),
+        ),
+      );
     }
   }
 
@@ -289,7 +334,6 @@ class _SearchBarState extends State<SearchBar> {
       });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -324,16 +368,19 @@ class _SearchBarState extends State<SearchBar> {
             children: [
               if (widget.controller.text.isNotEmpty)
                 IconButton(
-                  icon: Icon(Icons.clear,
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),),
-                  onPressed: widget.onClear,),
-
+                  icon: Icon(
+                    Icons.clear,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  ),
+                  onPressed: widget.onClear,
+                ),
               IconButton(
                 icon: Icon(
                   _isListening ? Icons.mic : Icons.mic_none,
                   color: theme.colorScheme.onSurface.withOpacity(0.5),
                 ),
-                  onPressed: _isListening ? _stopListening : _startListening, )
+                onPressed: _isListening ? _stopListening : _startListening,
+              )
             ],
           ),
           filled: true,
@@ -389,20 +436,18 @@ class SongListTile extends StatelessWidget {
           width: 50,
           height: 50,
           fit: BoxFit.cover,
-          placeholder: (context, url) =>
-              Container(
-                width: 50,
-                height: 50,
-                color: Colors.grey,
-                child: const Icon(Icons.music_note),
-              ),
-          errorWidget: (context, url, error) =>
-              Container(
-                width: 50,
-                height: 50,
-                color: Colors.grey,
-                child: const Icon(Icons.music_note),
-              ),
+          placeholder: (context, url) => Container(
+            width: 50,
+            height: 50,
+            color: Colors.grey,
+            child: const Icon(Icons.music_note),
+          ),
+          errorWidget: (context, url, error) => Container(
+            width: 50,
+            height: 50,
+            color: Colors.grey,
+            child: const Icon(Icons.music_note),
+          ),
         ),
       ),
       title: Text(song.title),
