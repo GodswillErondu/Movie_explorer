@@ -1,6 +1,7 @@
+
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart'
-    as mlkit;
+as mlkit;
 
 class DrawingRecognitionScreen extends StatefulWidget {
   const DrawingRecognitionScreen({super.key});
@@ -12,9 +13,9 @@ class DrawingRecognitionScreen extends StatefulWidget {
 
 class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
   final mlkit.DigitalInkRecognizer _digitalInkRecognizer =
-      mlkit.DigitalInkRecognizer(languageCode: 'en');
+  mlkit.DigitalInkRecognizer(languageCode: 'en');
   final mlkit.DigitalInkRecognizerModelManager _modelManager =
-      mlkit.DigitalInkRecognizerModelManager();
+  mlkit.DigitalInkRecognizerModelManager();
   final mlkit.Ink _ink = mlkit.Ink();
   List<mlkit.StrokePoint> _points = [];
   String _recognizedText = '';
@@ -95,7 +96,7 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
 
     try {
       final List<mlkit.RecognitionCandidate> candidates =
-          await _digitalInkRecognizer.recognize(_ink);
+      await _digitalInkRecognizer.recognize(_ink);
 
       setState(() {
         _recognizedText = candidates.isNotEmpty
@@ -144,98 +145,102 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
         ],
       ),
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
-      body: Stack(
+      body: Column(
         children: [
-          Column(
-            children: [
-              // Drawing Area
-              Expanded(
-                flex: 2,
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Theme.of(context).dividerColor,
+          // Drawing Area
+          Expanded(
+            flex: 2,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).dividerColor,
+                ),
+                color: isDarkMode ? Colors.black : Colors.white,
+              ),
+              child: GestureDetector(
+                onPanStart: (details) {
+                  _points = [
+                    mlkit.StrokePoint(
+                      x: details.localPosition.dx,
+                      y: details.localPosition.dy,
+                      t: DateTime.now().millisecondsSinceEpoch,
                     ),
-                    color: isDarkMode ? Colors.black : Colors.white,
-                  ),
-                  child: GestureDetector(
-                    onPanStart: (details) {
-                      _points = [
-                        mlkit.StrokePoint(
-                          x: details.localPosition.dx,
-                          y: details.localPosition.dy,
-                          t: DateTime.now().millisecondsSinceEpoch,
-                        ),
-                      ];
-                    },
-                    onPanUpdate: (details) {
-                      setState(() {
-                        _points.add(
-                          mlkit.StrokePoint(
-                            x: details.localPosition.dx,
-                            y: details.localPosition.dy,
-                            t: DateTime.now().millisecondsSinceEpoch,
-                          ),
-                        );
-                      });
-                    },
-                    onPanEnd: (details) {
-                      if (_points.length > 1) {
-                        final stroke = mlkit.Stroke()..points.addAll(_points);
-                        _ink.strokes.add(stroke);
-                        _points = [];
-                        _undoStack.clear();
-                        _recognizeText();
-                      }
-                    },
-                    child: CustomPaint(
-                      painter: DrawingPainter(
-                        ink: _ink,
-                        points: _points,
-                        isDarkMode: isDarkMode,
+                  ];
+                },
+                onPanUpdate: (details) {
+                  setState(() {
+                    _points.add(
+                      mlkit.StrokePoint(
+                        x: details.localPosition.dx,
+                        y: details.localPosition.dy,
+                        t: DateTime.now().millisecondsSinceEpoch,
                       ),
-                      size: Size.infinite,
-                    ),
+                    );
+                  });
+                },
+                onPanEnd: (details) {
+                  if (_points.length > 1) {
+                    final stroke = mlkit.Stroke()..points.addAll(_points);
+                    _ink.strokes.add(stroke);
+                    _points = [];
+                    _undoStack.clear();
+                    _recognizeText();
+                  }
+                },
+                child: CustomPaint(
+                  painter: DrawingPainter(
+                    ink: _ink,
+                    points: _points,
+                    isDarkMode: isDarkMode,
                   ),
-                ),
-              ),
-              // Recognition Results Area
-              Container(
-                height: 100,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  border: Border(
-                    top: BorderSide(color: Theme.of(context).dividerColor),
-                  ),
-                ),
-                child: Center(
-                  child: _isProcessing
-                      ? CircularProgressIndicator(
-                          color: Theme.of(context).colorScheme.primary,
-                        )
-                      : Text(
-                          _recognizedText,
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                        ),
-                ),
-              ),
-            ],
-          ),
-          if (_isProcessing)
-            Container(
-              color: isDarkMode ? Colors.black54 : Colors.white54,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: Theme.of(context).colorScheme.primary,
+                  size: Size.infinite,
                 ),
               ),
             ),
+          ),
+          Container(
+            height: 100,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(
+                top: BorderSide(color: Theme.of(context).dividerColor),
+              ),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                AnimatedOpacity(
+                  opacity: _isProcessing ? 0.5 : 1.0,
+                  duration: const Duration(milliseconds: 200),
+                  child: Text(
+                    _recognizedText.isEmpty && _isProcessing
+                        ? 'Processing...'
+                        : _recognizedText,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
+                        ?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                if (_isProcessing)
+                  Positioned(
+                    right: 0,
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.0,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -286,3 +291,4 @@ class DrawingPainter extends CustomPainter {
   @override
   bool shouldRepaint(DrawingPainter oldDelegate) => true;
 }
+

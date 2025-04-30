@@ -5,6 +5,7 @@ import 'package:movie_explorer_app/models/song.dart';
 import 'package:movie_explorer_app/providers/audio_player_provider.dart';
 import 'package:movie_explorer_app/services/audio_service.dart';
 import 'package:provider/provider.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class AudioScreen extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -104,7 +105,7 @@ class BrowseTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final audioService = Provider.of<AudioService>(context, listen: false);
     final audioPlayerProvider =
-        Provider.of<AudioPlayerProvider>(context, listen: false);
+    Provider.of<AudioPlayerProvider>(context, listen: false);
 
     return FutureBuilder<List<Song>>(
       future: audioService.getSongs(),
@@ -195,7 +196,7 @@ class _SearchTabState extends State<SearchTab> {
   @override
   Widget build(BuildContext context) {
     final audioPlayerProvider =
-        Provider.of<AudioPlayerProvider>(context, listen: false);
+    Provider.of<AudioPlayerProvider>(context, listen: false);
 
     return Column(
       children: [
@@ -214,30 +215,30 @@ class _SearchTabState extends State<SearchTab> {
           child: _isSearching
               ? const Center(child: CircularProgressIndicator())
               : _searchResults.isEmpty && _searchController.text.isNotEmpty
-                  ? const Center(child: Text('No results found'))
-                  : _searchResults.isEmpty
-                      ? const Center(child: Text('Search for music'))
-                      : ListView.builder(
-                          itemCount: _searchResults.length,
-                          itemBuilder: (context, index) {
-                            final song = _searchResults[index];
-                            return SongListTile(
-                              song: song,
-                              onTap: () {
-                                audioPlayerProvider.setPlaylist(_searchResults,
-                                    initialIndex: index);
-                                audioPlayerProvider.play();
-                              },
-                            );
-                          },
-                        ),
+              ? const Center(child: Text('No results found'))
+              : _searchResults.isEmpty
+              ? const Center(child: Text('Search for music'))
+              : ListView.builder(
+            itemCount: _searchResults.length,
+            itemBuilder: (context, index) {
+              final song = _searchResults[index];
+              return SongListTile(
+                song: song,
+                onTap: () {
+                  audioPlayerProvider.setPlaylist(_searchResults,
+                      initialIndex: index);
+                  audioPlayerProvider.play();
+                },
+              );
+            },
+          ),
         ),
       ],
     );
   }
 }
 
-class SearchBar extends StatelessWidget {
+class SearchBar extends StatefulWidget {
   final TextEditingController controller;
   final Function(String) onChanged;
   final VoidCallback onClear;
@@ -248,6 +249,47 @@ class SearchBar extends StatelessWidget {
     required this.onChanged,
     required this.onClear,
   }) : super(key: key);
+
+  @override
+  State<SearchBar> createState() => _SearchBarState();
+}
+
+class _SearchBarState extends State<SearchBar> {
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
+
+  void _startListening() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        setState(() {
+          _isListening = true;
+        });
+        _speech.listen(onResult: (result) {
+          setState(() {
+            widget.controller.text = result.recognizedWords;
+            widget.onChanged(result.recognizedWords);
+          });
+        });
+      }
+    }
+  }
+
+  void _stopListening() {
+    if (_isListening) {
+      _speech.stop();
+      setState(() {
+        _isListening = false;
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -265,8 +307,8 @@ class SearchBar extends StatelessWidget {
         ),
       ),
       child: TextField(
-        controller: controller,
-        onChanged: onChanged,
+        controller: widget.controller,
+        onChanged: widget.onChanged,
         style: theme.textTheme.bodyLarge,
         decoration: InputDecoration(
           hintText: 'Search music...',
@@ -277,15 +319,23 @@ class SearchBar extends StatelessWidget {
             Icons.search,
             color: theme.colorScheme.onSurface.withOpacity(0.5),
           ),
-          suffixIcon: controller.text.isNotEmpty
-              ? IconButton(
-                  icon: Icon(
-                    Icons.clear,
-                    color: theme.colorScheme.onSurface.withOpacity(0.5),
-                  ),
-                  onPressed: onClear,
-                )
-              : null,
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (widget.controller.text.isNotEmpty)
+                IconButton(
+                  icon: Icon(Icons.clear,
+                    color: theme.colorScheme.onSurface.withOpacity(0.5),),
+                  onPressed: widget.onClear,),
+
+              IconButton(
+                icon: Icon(
+                  _isListening ? Icons.mic : Icons.mic_none,
+                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                ),
+                  onPressed: _isListening ? _stopListening : _startListening, )
+            ],
+          ),
           filled: true,
           fillColor: isDark
               ? theme.colorScheme.surface.withOpacity(0.06)
@@ -339,18 +389,20 @@ class SongListTile extends StatelessWidget {
           width: 50,
           height: 50,
           fit: BoxFit.cover,
-          placeholder: (context, url) => Container(
-            width: 50,
-            height: 50,
-            color: Colors.grey,
-            child: const Icon(Icons.music_note),
-          ),
-          errorWidget: (context, url, error) => Container(
-            width: 50,
-            height: 50,
-            color: Colors.grey,
-            child: const Icon(Icons.music_note),
-          ),
+          placeholder: (context, url) =>
+              Container(
+                width: 50,
+                height: 50,
+                color: Colors.grey,
+                child: const Icon(Icons.music_note),
+              ),
+          errorWidget: (context, url, error) =>
+              Container(
+                width: 50,
+                height: 50,
+                color: Colors.grey,
+                child: const Icon(Icons.music_note),
+              ),
         ),
       ),
       title: Text(song.title),

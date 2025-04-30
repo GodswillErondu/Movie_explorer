@@ -193,4 +193,4 @@ class AudioPlayerScreen extends StatelessWidget {
       ),
     );
   }
-}        // Rest of the code remains the same...
+}
