@@ -122,6 +122,12 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
     });
   }
 
+  void _submitRecognizedText() {
+    if(_recognizedText.isNotEmpty && _recognizedText != 'No text recognized') {
+      Navigator.pop(context, _recognizedText);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -132,6 +138,11 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
           style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: _isProcessing ? null : _submitRecognizedText,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           IconButton(
             icon: const Icon(Icons.undo),
             onPressed: _ink.strokes.isNotEmpty ? _undoLastStroke : null,

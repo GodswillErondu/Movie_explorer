@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:movie_explorer_app/models/song.dart';
 import 'package:movie_explorer_app/providers/audio_player_provider.dart';
+import 'package:movie_explorer_app/screens/drawing_recognition_screen.dart';
 import 'package:movie_explorer_app/services/audio_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -256,84 +257,105 @@ class SearchBar extends StatefulWidget {
 }
 
 class _SearchBarState extends State<SearchBar> {
-  late stt.SpeechToText _speech;
-  bool _isListening = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _speech = stt.SpeechToText();
-  }
-
-  Future<bool> _requestMicrophonePermission() async {
-    final status = await Permission.microphone.request();
-    if (status.isGranted) {
-      return true;
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content:
-              Text('Microphone permission is required for speech recognition'),
-        ),
-      );
-      return false;
-    }
-  }
-
-  void _startListening() async {
-    if (_isListening) return;
-    final hasPermission = await _requestMicrophonePermission();
-    if (!hasPermission) return;
-
-    bool available = await _speech.initialize(
-      onError: (error) {
-        print("Speech-to-Text Error: ${error.errorMsg}");
-        setState(() {
-          _isListening = false;
-        });
-      },
-      onStatus: (status) {
-        print("Speech-to-Text Status: $status");
-        if (status == 'notListening') {
-          setState(() {
-            _isListening = false;
-          });
-        }
-      },
+  void _openDrawRecognition() async {
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DrawingRecognitionScreen(),
+      ),
     );
 
-    if (available) {
+    if (result != null && result.isNotEmpty && result != 'No text recognized') {
       setState(() {
-        _isListening = true;
+        widget.controller.text = result;
+        widget.onChanged(result);
       });
-      await _speech.listen(
-          onResult: (result) {
-            setState(() {
-              widget.controller.text = result.recognizedWords;
-              widget.onChanged(result.recognizedWords);
-            });
-          },
-          listenFor: const Duration(seconds: 30),
-          pauseFor: const Duration(seconds: 3),
-          partialResults: true,
-          localeId: 'en_US');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Speech recognition not available on this device'),
-        ),
-      );
+
     }
   }
 
-  void _stopListening() {
-    if (_isListening) {
-      _speech.stop();
-      setState(() {
-        _isListening = false;
-      });
-    }
-  }
+
+
+  // Text to Speech Implementation
+
+  // late stt.SpeechToText _speech;
+  // bool _isListening = false;
+  //
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _speech = stt.SpeechToText();
+  // }
+  //
+  // Future<bool> _requestMicrophonePermission() async {
+  //   final status = await Permission.microphone.request();
+  //   if (status.isGranted) {
+  //     return true;
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content:
+  //             Text('Microphone permission is required for speech recognition'),
+  //       ),
+  //     );
+  //     return false;
+  //   }
+  // }
+  //
+  // void _startListening() async {
+  //   if (_isListening) return;
+  //   final hasPermission = await _requestMicrophonePermission();
+  //   if (!hasPermission) return;
+  //
+  //   bool available = await _speech.initialize(
+  //     onError: (error) {
+  //       print("Speech-to-Text Error: ${error.errorMsg}");
+  //       setState(() {
+  //         _isListening = false;
+  //       });
+  //     },
+  //     onStatus: (status) {
+  //       print("Speech-to-Text Status: $status");
+  //       if (status == 'notListening') {
+  //         setState(() {
+  //           _isListening = false;
+  //         });
+  //       }
+  //     },
+  //   );
+  //
+  //   if (available) {
+  //     setState(() {
+  //       _isListening = true;
+  //     });
+  //     await _speech.listen(
+  //         onResult: (result) {
+  //           setState(() {
+  //             widget.controller.text = result.recognizedWords;
+  //             widget.onChanged(result.recognizedWords);
+  //           });
+  //         },
+  //         listenFor: const Duration(seconds: 30),
+  //         pauseFor: const Duration(seconds: 3),
+  //         partialResults: true,
+  //         localeId: 'en_US');
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Speech recognition not available on this device'),
+  //       ),
+  //     );
+  //   }
+  // }
+  //
+  // void _stopListening() {
+  //   if (_isListening) {
+  //     _speech.stop();
+  //     setState(() {
+  //       _isListening = false;
+  //     });
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -376,11 +398,20 @@ class _SearchBarState extends State<SearchBar> {
                 ),
               IconButton(
                 icon: Icon(
-                  _isListening ? Icons.mic : Icons.mic_none,
+                  Icons.draw,
                   color: theme.colorScheme.onSurface.withOpacity(0.5),
                 ),
-                onPressed: _isListening ? _stopListening : _startListening,
-              )
+                  onPressed: _openDrawRecognition, )
+
+              // Text to Speech Implementation
+
+              // IconButton(
+              //   icon: Icon(
+              //     _isListening ? Icons.mic : Icons.mic_none,
+              //     color: theme.colorScheme.onSurface.withOpacity(0.5),
+              //   ),
+              //   onPressed: _isListening ? _stopListening : _startListening,
+              // )
             ],
           ),
           filled: true,
