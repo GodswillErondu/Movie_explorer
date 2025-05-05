@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:movie_explorer_app/models/movie.dart';
 import 'package:movie_explorer_app/screens/movie_details_screen.dart';
 import 'package:movie_explorer_app/services/movie_service.dart';
-import 'package:movie_explorer_app/providers/theme_notifier.dart';
+import 'package:movie_explorer_app/providers/theme_provider.dart';
 import 'package:movie_explorer_app/widgets/cached_movie_image.dart';
 import 'package:provider/provider.dart';
 
@@ -48,7 +48,7 @@ class _MovieScreenState extends State<MovieScreen> {
           style: Theme.of(context).appBarTheme.titleTextStyle,
         ),
         actions: <Widget>[
-          Consumer<ThemeNotifier>(
+          Consumer<ThemeProvider>(
             builder: (context, themeNotifier, child) {
               return PopupMenuButton<ThemeModeOption>(
                 icon: Icon(
@@ -179,7 +179,7 @@ class _MovieScreenState extends State<MovieScreen> {
     BuildContext context,
     ThemeModeOption option,
     String label,
-    ThemeNotifier themeNotifier,
+    ThemeProvider themeNotifier,
   ) {
     final isSelected = themeNotifier.selectedOption == option;
 

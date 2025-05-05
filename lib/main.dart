@@ -7,7 +7,7 @@ import 'package:movie_explorer_app/screens/movie_details_screen.dart';
 import 'package:movie_explorer_app/screens/movie_screen.dart';
 import 'package:movie_explorer_app/services/audio_service.dart';
 import 'package:movie_explorer_app/theme/theme.dart';
-import 'package:movie_explorer_app/providers/theme_notifier.dart';
+import 'package:movie_explorer_app/providers/theme_provider.dart';
 import 'package:movie_explorer_app/widgets/scaffold_with_navigation_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:movie_explorer_app/services/cache_service.dart';
@@ -41,7 +41,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ThemeNotifier()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AudioPlayerProvider()),
         Provider.value(value: movieService),
         Provider.value(value: audioService),
@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeNotifier>(
+    return Consumer<ThemeProvider>(
       builder: (context, themeNotifier, child) {
         return MaterialApp.router(
           routerConfig: routerConfig, // Use the imported router config
