@@ -21,7 +21,6 @@ class AudioService {
       if (cached != null && cached.isNotEmpty) {
         return cached;
       }
-
       final url = Uri.parse(
           "$_apiBaseUrl/tracks/?client_id=$_clientId&format=json&limit=20&include=musicinfo&boost=popularity_total");
 
@@ -47,7 +46,7 @@ class AudioService {
       } else {
         return _getMockSongs();
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       return _getMockSongs();
     }
   }

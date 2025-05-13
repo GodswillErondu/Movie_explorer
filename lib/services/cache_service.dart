@@ -8,16 +8,13 @@ class CacheService {
   static const String upcomingBoxName = 'upcomingMovies';
   static const String timestampBoxName = 'timestamps';
   static const String moviesBoxName = 'movies';
-
   static const String songsBoxName = 'songs';
-
   static const Duration cacheValidity = Duration(hours: 12);
 
   late Box<Movie> _nowShowingBox;
   late Box<Movie> _popularBox;
   late Box<Movie> _upcomingBox;
   late Box<int> _timestampBox;
-
   late Box<Song> _songsBox;
 
   static Future<void> clearAllBoxes() async {
@@ -31,8 +28,6 @@ class CacheService {
 
   static Future<CacheService> initialize() async {
     await Hive.initFlutter();
-
-    // Clear existing boxes if there's corrupted data
     try {
       await clearAllBoxes();
     } catch (e) {
@@ -55,7 +50,6 @@ class CacheService {
       _timestampBox = await Hive.openBox<int>(timestampBoxName);
       _songsBox = await Hive.openBox<Song>(songsBoxName);
     } catch (e) {
-      // If there's an error opening boxes, clear them and try again
       await clearAllBoxes();
       _nowShowingBox = await Hive.openBox<Movie>(nowShowingBoxName);
       _popularBox = await Hive.openBox<Movie>(popularBoxName);
@@ -70,7 +64,6 @@ class CacheService {
     await _popularBox.close();
     await _upcomingBox.close();
     await _timestampBox.close();
-
     await _songsBox.close();
     await Hive.close();
   }
