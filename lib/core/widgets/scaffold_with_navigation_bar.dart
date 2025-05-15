@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:movie_explorer_app/widgets/mini_player.dart';
+import 'package:movie_explorer_app/audio/widgets/mini_player.dart';
 import 'package:provider/provider.dart';
-import 'package:movie_explorer_app/providers/audio_player_provider.dart';
+import 'package:movie_explorer_app/audio/providers/audio_player_provider.dart';
 
 class ScaffoldWithNavigationBar extends StatelessWidget {
   const ScaffoldWithNavigationBar({
@@ -17,10 +17,6 @@ class ScaffoldWithNavigationBar extends StatelessWidget {
     return Scaffold(
       body: Consumer<AudioPlayerProvider>(
         builder: (context, audioProvider, child) {
-          // Calculate bottom padding based on player visibility
-          final bottomPadding =
-              audioProvider.isPlayerVisible ? kMiniPlayerHeight : 0.0;
-
           return Column(
             children: [
               // Main content with flexible height

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movie_explorer_app/models/stroke.dart';
+import 'package:movie_explorer_app/draw/models/stroke.dart';
 
 class DrawingProvider extends ChangeNotifier {
    List<Stroke> _strokes = [];
@@ -9,7 +9,7 @@ class DrawingProvider extends ChangeNotifier {
   double _brushSize = 4.0;
   bool _isEraser = false;
 
-  // Getters
+
   List<Stroke> get strokes => _strokes;
   List<Stroke> get redoStrokes => _redoStrokes;
   List<Offset> get currentPoints => _currentPoints;
@@ -23,6 +23,8 @@ class DrawingProvider extends ChangeNotifier {
     if (_isEraser) {
       return Theme.of(context).scaffoldBackgroundColor;
     }
+
+
     if (_selectedColor == null) {
       return Theme.of(context).brightness == Brightness.dark
           ? Colors.white

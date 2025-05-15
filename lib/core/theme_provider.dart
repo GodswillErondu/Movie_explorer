@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../theme/theme_constants.dart';
+import 'constants/theme_constants.dart';
 
 class ThemeProvider with ChangeNotifier {
   static const String _prefsKey = 'theme_mode';

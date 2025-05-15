@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:movie_explorer_app/models/movie.dart';
-import 'package:movie_explorer_app/services/movie_service.dart';
-import 'package:movie_explorer_app/widgets/cached_movie_image.dart';
+import 'package:movie_explorer_app/movie/models/movie.dart';
+import 'package:movie_explorer_app/movie/services/movie_service.dart';
+import 'package:movie_explorer_app/movie/services/cached_movie_image.dart';
 import 'package:provider/provider.dart';
 
 class MovieDetailsScreen extends StatelessWidget {

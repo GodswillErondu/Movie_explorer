@@ -2,37 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:ui';
 
-import 'package:movie_explorer_app/models/stroke.dart';
-import 'package:movie_explorer_app/providers/drawing_provider.dart';
-import 'package:movie_explorer_app/widgets/drawing_toolbar.dart';
+import 'package:movie_explorer_app/draw/models/stroke.dart';
+import 'package:movie_explorer_app/draw/providers/drawing_provider.dart';
+import 'package:movie_explorer_app/draw/widgets/drawing_toolbar.dart';
 import 'package:provider/provider.dart';
 
 class DrawingScreen extends StatelessWidget {
-  const DrawingScreen({Key? key}) : super(key: key);
+  const DrawingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => DrawingProvider(),
-      child: const _DrawingScreenContent(),
-    );
-  }
-}
-
-class _DrawingScreenContent extends StatelessWidget {
-  const _DrawingScreenContent({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final drawingProvider = context.watch<DrawingProvider>();
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode = theme.brightness == Brightness.dark;
     final effectiveColor = drawingProvider.getEffectiveColor(context);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Draw Your Dream',
-          style: Theme.of(context).appBarTheme.titleTextStyle,
+          style: theme.appBarTheme.titleTextStyle,
         ),
       ),
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
@@ -66,6 +55,7 @@ class _DrawingScreenContent extends StatelessWidget {
     );
   }
 }
+
 
 class DrawPainter extends CustomPainter {
   final List<Stroke> strokes;

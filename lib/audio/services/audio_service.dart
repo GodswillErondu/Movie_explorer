@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:movie_explorer_app/models/song.dart';
-import 'package:movie_explorer_app/services/cache_service.dart';
-import '../core/constants/app_constants.dart';
+import 'package:movie_explorer_app/audio/models/song.dart';
+import 'package:movie_explorer_app/core/cache_service.dart';
+import '../../core/constants/app_constants.dart';
 
 class AudioService {
   final CacheService _cacheService;

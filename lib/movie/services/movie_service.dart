@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'package:movie_explorer_app/models/movie.dart';
-import 'package:movie_explorer_app/services/cache_service.dart';
-import '../core/constants/app_constants.dart';
+import 'package:movie_explorer_app/movie/models/movie.dart';
+import 'package:movie_explorer_app/core/cache_service.dart';
+import '../../core/constants/app_constants.dart';
 
 class MovieService {
   final CacheService _cacheService;

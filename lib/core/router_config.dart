@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:movie_explorer_app/screens/audio_screen.dart';
-import 'package:movie_explorer_app/screens/drawing_recognition_screen.dart';
-import 'package:movie_explorer_app/screens/movie_screen.dart';
-import 'package:movie_explorer_app/screens/movie_details_screen.dart';
-import 'package:movie_explorer_app/screens/audio_player_screen.dart';
-import 'package:movie_explorer_app/screens/drawing_screen.dart';
-import 'package:movie_explorer_app/widgets/scaffold_with_navigation_bar.dart';
+import 'package:movie_explorer_app/movie/screens/movie_details_screen.dart';
+import 'package:movie_explorer_app/movie/screens/movie_screen.dart';
+import 'package:movie_explorer_app/audio/screens/audio_screen.dart';
+import 'package:movie_explorer_app/draw/screens/drawing_recognition_screen.dart';
+import 'package:movie_explorer_app/audio/screens/audio_player_screen.dart';
+import 'package:movie_explorer_app/draw/screens/drawing_screen.dart';
+import 'package:movie_explorer_app/core/widgets/scaffold_with_navigation_bar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey =

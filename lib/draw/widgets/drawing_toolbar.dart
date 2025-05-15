@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:movie_explorer_app/providers/drawing_provider.dart';
+import 'package:movie_explorer_app/draw/providers/drawing_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../core/constants/drawing_constants.dart';
+import '../../core/constants/drawing_constants.dart';
 
 class DrawingToolbar extends StatelessWidget {
   const DrawingToolbar({super.key});

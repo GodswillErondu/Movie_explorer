@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:movie_explorer_app/models/song.dart';
-import 'package:movie_explorer_app/providers/audio_player_provider.dart';
-import 'package:movie_explorer_app/screens/drawing_recognition_screen.dart';
-import 'package:movie_explorer_app/services/audio_service.dart';
+import 'package:movie_explorer_app/audio/models/song.dart';
+import 'package:movie_explorer_app/audio/providers/audio_player_provider.dart';
+import 'package:movie_explorer_app/draw/screens/drawing_recognition_screen.dart';
+import 'package:movie_explorer_app/audio/services/audio_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -20,7 +20,6 @@ class AudioScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(

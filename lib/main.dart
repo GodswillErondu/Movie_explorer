@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:movie_explorer_app/navigation/router_config.dart';
-import 'package:movie_explorer_app/providers/audio_player_provider.dart';
-import 'package:movie_explorer_app/services/audio_service.dart';
-import 'package:movie_explorer_app/theme/theme.dart';
-import 'package:movie_explorer_app/providers/theme_provider.dart';
+import 'package:movie_explorer_app/core/router_config.dart';
+import 'package:movie_explorer_app/movie/providers/movie_provider.dart';
+import 'package:movie_explorer_app/movie/services/movie_service.dart';
+import 'package:movie_explorer_app/audio/providers/audio_player_provider.dart';
+import 'package:movie_explorer_app/draw/providers/drawing_provider.dart';
+import 'package:movie_explorer_app/audio/services/audio_service.dart';
+import 'package:movie_explorer_app/core/theme.dart';
+import 'package:movie_explorer_app/core/theme_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:movie_explorer_app/services/cache_service.dart';
-import 'package:movie_explorer_app/services/movie_service.dart';
+import 'package:movie_explorer_app/core/cache_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +40,8 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AudioPlayerProvider()),
+        ChangeNotifierProvider(create: (_) => DrawingProvider()),
+        ChangeNotifierProvider(create: (_) => MovieProvider(movieService)),
         Provider.value(value: movieService),
         Provider.value(value: audioService),
       ],

@@ -1,6 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:movie_explorer_app/models/movie.dart';
-import 'package:movie_explorer_app/models/song.dart';
+import 'package:movie_explorer_app/movie/models/movie.dart';
+import 'package:movie_explorer_app/audio/models/song.dart';
 
 class CacheService {
   static const String nowShowingBoxName = 'nowShowingMovies';
