@@ -5,34 +5,28 @@ import 'package:movie_explorer_app/movie/services/movie_service.dart';
 class MovieProvider with ChangeNotifier {
   final MovieService _movieService;
 
-  // Movie lists
   List<Movie> _nowShowingMovies = [];
   List<Movie> _popularMovies = [];
   List<Movie> _upcomingMovies = [];
 
-  // Loading states
   bool _isLoadingNowShowing = false;
   bool _isLoadingPopular = false;
   bool _isLoadingUpcoming = false;
 
-  // Error states
   String? _nowShowingError;
   String? _popularError;
   String? _upcomingError;
 
-  // Display counts
   int _nowShowingCount = 10;
   int _popularCount = 10;
   int _upcomingCount = 10;
 
-  // Track if data has been loaded at least once
   bool _hasLoadedNowShowing = false;
   bool _hasLoadedPopular = false;
   bool _hasLoadedUpcoming = false;
 
   MovieProvider(this._movieService);
 
-  // Getters
   List<Movie> get nowShowingMovies => _hasLoadedNowShowing
       ? _nowShowingMovies.take(_nowShowingCount).toList()
       : [];
@@ -57,7 +51,6 @@ class MovieProvider with ChangeNotifier {
   bool get hasMorePopular => _popularMovies.length > _popularCount;
   bool get hasMoreUpcoming => _upcomingMovies.length > _upcomingCount;
 
-  // Initial data loading
   Future<void> loadInitialData() async {
     await Future.wait([
       if (!_hasLoadedNowShowing) loadNowShowingMovies(),
@@ -66,7 +59,6 @@ class MovieProvider with ChangeNotifier {
     ]);
   }
 
-  // Individual loading methods
   Future<void> loadNowShowingMovies() async {
     if (_isLoadingNowShowing) return;
 

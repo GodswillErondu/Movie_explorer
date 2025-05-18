@@ -1,157 +1,44 @@
 
 import 'package:flutter/material.dart';
-import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart'
-as mlkit;
+import 'package:movie_explorer_app/draw/providers/drawing_recognition_provider.dart';
+import 'package:movie_explorer_app/draw/widgets/drawing_painter.dart';
+import 'package:provider/provider.dart';
 
-class DrawingRecognitionScreen extends StatefulWidget {
-  const DrawingRecognitionScreen({super.key});
-
-  @override
-  State<DrawingRecognitionScreen> createState() =>
-      _DrawingRecognitionScreenState();
-}
-
-class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
-  final mlkit.DigitalInkRecognizer _digitalInkRecognizer =
-  mlkit.DigitalInkRecognizer(languageCode: 'en');
-  final mlkit.DigitalInkRecognizerModelManager _modelManager =
-  mlkit.DigitalInkRecognizerModelManager();
-  final mlkit.Ink _ink = mlkit.Ink();
-  List<mlkit.StrokePoint> _points = [];
-  String _recognizedText = '';
-  bool _isProcessing = false;
-  bool _isModelDownloaded = false;
-  List<mlkit.Stroke> _undoStack = []; // Add undo stack
-
-  void _undoLastStroke() {
-    if (_ink.strokes.isNotEmpty) {
-      setState(() {
-        // Remove the last stroke and add it to undo stack
-        final lastStroke = _ink.strokes.removeLast();
-        _undoStack.add(lastStroke);
-        // Trigger recognition after undo
-        _recognizeText();
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _checkAndDownloadModel();
-  }
-
-  @override
-  void dispose() {
-    _digitalInkRecognizer.close();
-    _ink.strokes.clear();
-    _points.clear();
-    _undoStack.clear();
-    super.dispose();
-  }
-
-  Future<void> _checkAndDownloadModel() async {
-    try {
-      final bool modelExists = await _modelManager.isModelDownloaded('en');
-      if (!modelExists) {
-        setState(() {
-          _recognizedText = 'Downloading model...';
-          _isProcessing = true;
-        });
-        await _modelManager.downloadModel('en');
-      }
-      setState(() {
-        _isModelDownloaded = true;
-        _recognizedText = 'Ready to recognize';
-        _isProcessing = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isModelDownloaded = false;
-        _recognizedText = 'Error with model: ${e.toString()}';
-        _isProcessing = false;
-      });
-      print('Model error: ${e.toString()}');
-    }
-  }
-
-  Future<void> _recognizeText() async {
-    if (!_isModelDownloaded) {
-      setState(() {
-        _recognizedText = 'Model not ready';
-      });
-      return;
-    }
-
-    if (_ink.strokes.isEmpty) {
-      setState(() {
-        _recognizedText = 'Draw something';
-      });
-      return;
-    }
-
-    setState(() {
-      _isProcessing = true;
-    });
-
-    try {
-      final List<mlkit.RecognitionCandidate> candidates =
-      await _digitalInkRecognizer.recognize(_ink);
-
-      setState(() {
-        _recognizedText = candidates.isNotEmpty
-            ? candidates.first.text
-            : 'No text recognized';
-        _isProcessing = false;
-      });
-    } catch (e) {
-      setState(() {
-        _recognizedText = 'Error recognizing text: ${e.toString()}';
-        _isProcessing = false;
-      });
-      print('Recognition error: ${e.toString()}');
-    }
-  }
-
-  void _clearPad() {
-    setState(() {
-      _ink.strokes.clear();
-      _points = [];
-      _recognizedText = '';
-      _undoStack.clear(); // Clear undo stack when clearing pad
-    });
-  }
-
-  void _submitRecognizedText() {
-    if(_recognizedText.isNotEmpty && _recognizedText != 'No text recognized') {
-      Navigator.pop(context, _recognizedText);
-    }
-  }
-
+class DrawingRecognitionScreen extends StatelessWidget {
+   const DrawingRecognitionScreen({super.key});
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<DrawingRecognitionProvider>(context,);
+    final theme = Theme.of(context);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+
+    void submitRecognizedText() {
+      if(provider.recognizedText.isNotEmpty && provider.recognizedText != 'No text recognized') {
+        Navigator.pop(context, provider.recognizedText);
+      }
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Text Recognition',
-          style: Theme.of(context).appBarTheme.titleTextStyle,
+          style: theme.appBarTheme.titleTextStyle,
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: _isProcessing ? null : _submitRecognizedText,
-            color: Theme.of(context).colorScheme.onSurface,
+            onPressed: provider.isProcessing ? null : submitRecognizedText,
+            color: theme.colorScheme.onSurface,
           ),
           IconButton(
             icon: const Icon(Icons.undo),
-            onPressed: _ink.strokes.isNotEmpty ? _undoLastStroke : null,
-            color: Theme.of(context).colorScheme.onSurface,
+            onPressed: provider.ink.strokes.isNotEmpty ? provider.undoLastStroke : null,
+            color: theme.colorScheme.onSurface,
           ),
           IconButton(
             icon: const Icon(Icons.clear),
-            onPressed: _clearPad,
-            color: Theme.of(context).colorScheme.onSurface,
+            onPressed: provider.clearPad,
+            color: theme.colorScheme.onSurface,
           ),
         ],
       ),
@@ -164,93 +51,81 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: Theme.of(context).dividerColor,
+                  color: theme.dividerColor,
                 ),
                 color: isDarkMode ? Colors.black : Colors.white,
               ),
               child: GestureDetector(
                 onPanStart: (details) {
-                  _points = [
-                    mlkit.StrokePoint(
-                      x: details.localPosition.dx,
-                      y: details.localPosition.dy,
-                      t: DateTime.now().millisecondsSinceEpoch,
-                    ),
-                  ];
+                  provider.startStroke(details.localPosition);
                 },
                 onPanUpdate: (details) {
-                  setState(() {
-                    _points.add(
-                      mlkit.StrokePoint(
-                        x: details.localPosition.dx,
-                        y: details.localPosition.dy,
-                        t: DateTime.now().millisecondsSinceEpoch,
-                      ),
-                    );
-                  });
+                 provider.updateStroke(details.localPosition);
                 },
                 onPanEnd: (details) {
-                  if (_points.length > 1) {
-                    final stroke = mlkit.Stroke()..points.addAll(_points);
-                    _ink.strokes.add(stroke);
-                    _points = [];
-                    _undoStack.clear();
-                    _recognizeText();
-                  }
+                 provider.endStroke();
                 },
-                child: CustomPaint(
-                  painter: DrawingPainter(
-                    ink: _ink,
-                    points: _points,
-                    isDarkMode: isDarkMode,
-                  ),
-                  size: Size.infinite,
+                child: Consumer<DrawingRecognitionProvider>(
+                  builder: (context, provider, _) {
+                    return CustomPaint(
+                      painter: DrawingPainter(
+                        ink: provider.ink,
+                        points: provider.points,
+                        isDarkMode: isDarkMode,
+                      ),
+                      size: Size.infinite,
+                    );
+                  }
                 ),
               ),
             ),
           ),
-          Container(
-            height: 100,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              border: Border(
-                top: BorderSide(color: Theme.of(context).dividerColor),
-              ),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                AnimatedOpacity(
-                  opacity: _isProcessing ? 0.5 : 1.0,
-                  duration: const Duration(milliseconds: 200),
-                  child: Text(
-                    _recognizedText.isEmpty && _isProcessing
-                        ? 'Processing...'
-                        : _recognizedText,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall
-                        ?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    textAlign: TextAlign.center,
+          Consumer<DrawingRecognitionProvider>(
+            builder: (context, provider, _) {
+              return Container(
+                height: 100,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  border: Border(
+                    top: BorderSide(color: theme.dividerColor),
                   ),
                 ),
-                if (_isProcessing)
-                  Positioned(
-                    right: 0,
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        color: Theme.of(context).colorScheme.primary,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AnimatedOpacity(
+                      opacity: provider.isProcessing ? 0.5 : 1.0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Text(
+                        provider.recognizedText.isEmpty && provider.isProcessing
+                            ? 'Processing...'
+                            : provider.recognizedText,
+                        style: theme
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                  ),
-              ],
-            ),
+                    if (provider.isProcessing)
+                      Positioned(
+                        right: 0,
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            }
           ),
         ],
       ),
@@ -258,48 +133,4 @@ class _DrawingRecognitionScreenState extends State<DrawingRecognitionScreen> {
   }
 }
 
-class DrawingPainter extends CustomPainter {
-  final mlkit.Ink ink;
-  final List<mlkit.StrokePoint> points;
-  final bool isDarkMode;
-
-  DrawingPainter({
-    required this.ink,
-    required this.points,
-    required this.isDarkMode,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = isDarkMode ? Colors.white : Colors.black
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 4.0;
-
-    // Draw completed strokes
-    for (final stroke in ink.strokes) {
-      for (int i = 0; i < stroke.points.length - 1; i++) {
-        final p1 = stroke.points[i];
-        final p2 = stroke.points[i + 1];
-        canvas.drawLine(
-          Offset(p1.x, p1.y),
-          Offset(p2.x, p2.y),
-          paint,
-        );
-      }
-    }
-
-    // Draw current stroke
-    for (int i = 0; i < points.length - 1; i++) {
-      canvas.drawLine(
-        Offset(points[i].x, points[i].y),
-        Offset(points[i + 1].x, points[i + 1].y),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(DrawingPainter oldDelegate) => true;
-}
 

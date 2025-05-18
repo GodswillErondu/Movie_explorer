@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:movie_explorer_app/movie/models/movie.dart';
 import 'package:movie_explorer_app/core/theme_provider.dart';
-import 'package:movie_explorer_app/movie/services/cached_movie_image.dart';
 import 'package:movie_explorer_app/movie/providers/movie_provider.dart';
+import 'package:movie_explorer_app/movie/widgets/movie_section.dart';
+import 'package:movie_explorer_app/core/widgets/theme_change_snackbar.dart';
 import 'package:provider/provider.dart';
 
 class MovieScreen extends StatelessWidget {
@@ -14,7 +13,6 @@ class MovieScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final movieProvider = Provider.of<MovieProvider>(context, listen: false);
 
-    // Trigger initial loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       movieProvider.loadInitialData();
     });
@@ -56,7 +54,8 @@ class MovieScreen extends StatelessWidget {
                 ],
                 onSelected: (ThemeModeOption selectedTheme) {
                   themeNotifier.setTheme(selectedTheme);
-                  _showThemeChangeSnackBar(context, selectedTheme);
+                  ThemeChangeSnackBar.show(context, selectedTheme);
+
                 },
               );
             },
@@ -69,8 +68,7 @@ class MovieScreen extends StatelessWidget {
             onRefresh: movieProvider.refreshAll,
             child: ListView(
               children: [
-                _buildMovieSection(
-                  context,
+                MovieSection(
                   title: 'Now Showing',
                   movies: movieProvider.nowShowingMovies,
                   isLoading: movieProvider.isLoadingNowShowing,
@@ -78,8 +76,7 @@ class MovieScreen extends StatelessWidget {
                   hasMore: movieProvider.hasMoreNowShowing,
                   onLoadMore: movieProvider.loadMoreNowShowing,
                 ),
-                _buildMovieSection(
-                  context,
+                MovieSection(
                   title: 'Popular',
                   movies: movieProvider.popularMovies,
                   isLoading: movieProvider.isLoadingPopular,
@@ -87,8 +84,7 @@ class MovieScreen extends StatelessWidget {
                   hasMore: movieProvider.hasMorePopular,
                   onLoadMore: movieProvider.loadMorePopular,
                 ),
-                _buildMovieSection(
-                  context,
+                MovieSection(
                   title: 'Upcoming',
                   movies: movieProvider.upcomingMovies,
                   isLoading: movieProvider.isLoadingUpcoming,
@@ -104,93 +100,14 @@ class MovieScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMovieSection(
-      BuildContext context, {
-        required String title,
-        required List<Movie> movies,
-        required bool isLoading,
-        required String? error,
-        required bool hasMore,
-        required VoidCallback onLoadMore,
-      }) {
-    final theme = Theme.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            title,
-            style: theme.textTheme.headlineSmall,
-          ),
-        ),
-        if (isLoading && movies.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 32.0),
-            child: Center(child: CircularProgressIndicator()),
-          ),
-        if (error != null && movies.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: Text(
-                error,
-                style: theme.textTheme.bodyMedium?.copyWith(color: Colors.red),
-              ),
-            ),
-          ),
-        if (movies.isNotEmpty)
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.75,
-              crossAxisSpacing: 16.0,
-              mainAxisSpacing: 16.0,
-            ),
-            itemCount: movies.length,
-            itemBuilder: (context, index) {
-              final movie = movies[index];
-              return GestureDetector(
-                onTap: () => context.go('/details/${movie.id}'),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: theme.cardTheme.color,
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16.0),
-                    child: CachedMovieImage(
-                      imagePath: movie.backdropPath,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        if (hasMore && !isLoading)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: onLoadMore,
-              child: const Text('Load More'),
-            ),
-          ),
-      ],
-    );
-  }
 
   PopupMenuItem<ThemeModeOption> _buildThemeMenuItem(
-      BuildContext context,
-      ThemeModeOption option,
-      String label,
-      ThemeProvider themeNotifier,
-      ) {
+    BuildContext context,
+    ThemeModeOption option,
+    String label,
+    ThemeProvider themeNotifier,
+  ) {
     final isSelected = themeNotifier.selectedOption == option;
 
     return PopupMenuItem<ThemeModeOption>(
@@ -215,9 +132,11 @@ class MovieScreen extends StatelessWidget {
   }
 
   void _showThemeChangeSnackBar(
-      BuildContext context,
-      ThemeModeOption selectedTheme,
-      ) {
+    BuildContext context,
+    ThemeModeOption selectedTheme,
+  )
+
+  {
     String themeName = selectedTheme.name;
     themeName = themeName[0].toUpperCase() + themeName.substring(1);
     final theme = Theme.of(context);

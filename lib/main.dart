@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:movie_explorer_app/core/router_config.dart';
+import 'package:movie_explorer_app/draw/providers/drawing_recognition_provider.dart';
 import 'package:movie_explorer_app/movie/providers/movie_provider.dart';
 import 'package:movie_explorer_app/movie/services/movie_service.dart';
 import 'package:movie_explorer_app/audio/providers/audio_player_provider.dart';
@@ -41,6 +42,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AudioPlayerProvider()),
         ChangeNotifierProvider(create: (_) => DrawingProvider()),
+        ChangeNotifierProvider(create: (_) => DrawingRecognitionProvider()),
         ChangeNotifierProvider(create: (_) => MovieProvider(movieService)),
         Provider.value(value: movieService),
         Provider.value(value: audioService),
