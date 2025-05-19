@@ -40,7 +40,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => AudioPlayerProvider()),
+        ChangeNotifierProvider(create: (_) => AudioPlayerProvider(audioService)),
         ChangeNotifierProvider(create: (_) => DrawingProvider()),
         ChangeNotifierProvider(create: (_) => DrawingRecognitionProvider()),
         ChangeNotifierProvider(create: (_) => MovieProvider(movieService)),

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:movie_explorer_app/audio/models/song.dart';
+import 'package:movie_explorer_app/audio/services/audio_service.dart';
 
 class AudioPlayerProvider extends ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
+  final AudioService _audioService;
+
   List<Song> _playlist = [];
   int _currentIndex = 0;
   bool _isPlayerVisible = false;
@@ -11,6 +14,10 @@ class AudioPlayerProvider extends ChangeNotifier {
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
   double _progress = 0.0;
+
+  List<Song> _searchResults = [];
+  bool _isSearching = false;
+  String _searchQuery = '';
 
   AudioPlayer get audioPlayer => _audioPlayer;
   List<Song> get playlist => _playlist;
@@ -23,7 +30,11 @@ class AudioPlayerProvider extends ChangeNotifier {
   Duration get duration => _duration;
   double get progress => _progress;
 
-  AudioPlayerProvider() {
+  List<Song> get searchResults => _searchResults;
+  bool get isSearching => _isSearching;
+  String get searchQuery => _searchQuery;
+
+  AudioPlayerProvider(this._audioService) {
     // Listen to player state changes
     _audioPlayer.playerStateStream.listen((playerState) {
       _isPlaying = playerState.playing;
@@ -125,6 +136,45 @@ class AudioPlayerProvider extends ChangeNotifier {
       _progress = position.inMilliseconds / duration.inMilliseconds;
       notifyListeners();
     }
+  }
+
+  void performSearch(String query) async {
+    _searchQuery = query;
+
+
+    if (query.isEmpty) {
+        _isSearching = false;
+        _searchResults = [];
+        notifyListeners();
+        return;
+    }
+
+      _isSearching = true;
+    notifyListeners();
+
+    try {
+      final results = await _audioService
+          .searchSongs(query);
+        _searchResults = results;
+        _isSearching = false;
+        notifyListeners();
+    } catch (e) {
+        _searchResults = [];
+        _isSearching = false;
+        notifyListeners();
+    }
+  }
+
+  void clearSearch() {
+    _searchQuery = '';
+    _searchResults = [];
+    _isSearching = false;
+    notifyListeners();
+  }
+
+  void setSearchText(String text) {
+    _searchQuery = text;
+    notifyListeners();
   }
 
   @override

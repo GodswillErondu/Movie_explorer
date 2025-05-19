@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 const double kMiniPlayerHeight = 60.0;
 
 class MiniPlayer extends StatelessWidget {
-  const MiniPlayer({Key? key}) : super(key: key);
+  const MiniPlayer({super.key});
 
   @override
   Widget build(BuildContext context) {

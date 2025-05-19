@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:movie_explorer_app/audio/widgets/browse_tab.dart';
+import 'package:movie_explorer_app/audio/widgets/search_tab.dart';
 import 'package:movie_explorer_app/movie/screens/movie_details_screen.dart';
 import 'package:movie_explorer_app/movie/screens/movie_screen.dart';
 import 'package:movie_explorer_app/audio/screens/audio_screen.dart';

@@ -7,8 +7,8 @@ import 'package:movie_explorer_app/audio/providers/audio_player_provider.dart';
 class ScaffoldWithNavigationBar extends StatelessWidget {
   const ScaffoldWithNavigationBar({
     required this.navigationShell,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final StatefulNavigationShell navigationShell;
 
