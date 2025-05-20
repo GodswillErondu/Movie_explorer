@@ -1,25 +1,12 @@
 import 'package:hive_flutter/hive_flutter.dart';
 
-part 'song.g.dart';
 
-@HiveType(typeId: 2)
 class Song {
-  @HiveField(0)
   final int id;
-
-  @HiveField(1)
   final String title;
-
-  @HiveField(2)
   final String artist;
-
-  @HiveField(3)
   final String albumArt;
-
-  @HiveField(4)
   final String audioUrl;
-
-  @HiveField(5)
   final int duration;
 
   Song({

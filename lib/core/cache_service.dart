@@ -11,11 +11,11 @@ class CacheService {
   static const String songsBoxName = 'songs';
   static const Duration cacheValidity = Duration(hours: 12);
 
-  late Box<Movie> _nowShowingBox;
-  late Box<Movie> _popularBox;
-  late Box<Movie> _upcomingBox;
+  late Box<Map> _nowShowingBox;
+  late Box<Map> _popularBox;
+  late Box<Map> _upcomingBox;
   late Box<int> _timestampBox;
-  late Box<Song> _songsBox;
+  late Box<Map> _songsBox;
 
   static Future<void> clearAllBoxes() async {
     await Hive.deleteBoxFromDisk(nowShowingBoxName);
@@ -31,31 +31,32 @@ class CacheService {
     try {
       await clearAllBoxes();
     } catch (e) {
-      // Ignore errors during cleanup
     }
 
-    Hive.registerAdapter(MovieAdapter());
-    Hive.registerAdapter(SongAdapter());
+    _registerAdapters();
 
     final service = CacheService();
     await service._openBoxes();
     return service;
   }
 
+  static void _registerAdapters() {
+  }
+
   Future<void> _openBoxes() async {
     try {
-      _nowShowingBox = await Hive.openBox<Movie>(nowShowingBoxName);
-      _popularBox = await Hive.openBox<Movie>(popularBoxName);
-      _upcomingBox = await Hive.openBox<Movie>(upcomingBoxName);
+      _nowShowingBox = await Hive.openBox<Map>(nowShowingBoxName);
+      _popularBox = await Hive.openBox<Map>(popularBoxName);
+      _upcomingBox = await Hive.openBox<Map>(upcomingBoxName);
       _timestampBox = await Hive.openBox<int>(timestampBoxName);
-      _songsBox = await Hive.openBox<Song>(songsBoxName);
+      _songsBox = await Hive.openBox<Map>(songsBoxName);
     } catch (e) {
       await clearAllBoxes();
-      _nowShowingBox = await Hive.openBox<Movie>(nowShowingBoxName);
-      _popularBox = await Hive.openBox<Movie>(popularBoxName);
-      _upcomingBox = await Hive.openBox<Movie>(upcomingBoxName);
+      _nowShowingBox = await Hive.openBox<Map>(nowShowingBoxName);
+      _popularBox = await Hive.openBox<Map>(popularBoxName);
+      _upcomingBox = await Hive.openBox<Map>(upcomingBoxName);
       _timestampBox = await Hive.openBox<int>(timestampBoxName);
-      _songsBox = await Hive.openBox<Song>(songsBoxName);
+      _songsBox = await Hive.openBox<Map>(songsBoxName);
     }
   }
 
@@ -69,21 +70,25 @@ class CacheService {
   }
 
   Future<Movie?> getMovieById(String id) async {
-    final box = await Hive.openBox<Movie>(moviesBoxName);
-    return box.get(id);
+    final box = await Hive.openBox<Map>(moviesBoxName);
+    final movieMap = box.get(id);
+    return movieMap != null
+        ? Movie.fromMap(Map<String, dynamic>.from(movieMap))
+        : null;
   }
 
   Future<void> cacheMovie(Movie movie) async {
-    final box = await Hive.openBox<Movie>(moviesBoxName);
-    await box.put(movie.id.toString(), movie);
+    final box = await Hive.openBox<Map>(moviesBoxName);
+    await box.put(movie.id.toString(), movie.toMap());
   }
 
   Future<void> cacheMovies(String boxName, List<Movie> movies) async {
-    final box = await Hive.openBox<Movie>(boxName);
-    final Map<String, Movie> movieMap = {
-      for (var movie in movies) movie.id.toString(): movie
+    final box = await Hive.openBox<Map>(boxName);
+    final Map<String, Map<String, dynamic>> movieMap = {
+      for (var movie in movies) movie.id.toString(): movie.toMap()
     };
     await box.putAll(movieMap);
+    await _timestampBox.put(boxName, DateTime.now().millisecondsSinceEpoch);
   }
 
   List<Movie>? getCachedMovies(String boxName) {
@@ -94,10 +99,12 @@ class CacheService {
     if (age > cacheValidity.inMilliseconds) return null;
 
     final box = _getBox(boxName);
-    return box.values.toList();
+    return box.values
+        .map((map) => Movie.fromMap(Map<String, dynamic>.from(map)))
+        .toList();
   }
 
-  Box<Movie> _getBox(String boxName) {
+  Box<Map> _getBox(String boxName) {
     switch (boxName) {
       case nowShowingBoxName:
         return _nowShowingBox;
@@ -112,7 +119,10 @@ class CacheService {
 
   Future<void> cacheSongs(List<Song> songs) async {
     await _songsBox.clear();
-    await _songsBox.addAll(songs);
+    final songMaps = songs.map((song) => song.toMap()).toList();
+    for (var i = 0; i < songMaps.length; i++) {
+      await _songsBox.put(i, songMaps[i]);
+    }
     await _timestampBox.put(
         songsBoxName, DateTime.now().millisecondsSinceEpoch);
   }
@@ -124,7 +134,9 @@ class CacheService {
     final age = DateTime.now().millisecondsSinceEpoch - timestamp;
     if (age > cacheValidity.inMilliseconds) return null;
 
-    return _songsBox.values.toList();
+    return _songsBox.values
+        .map((map) => Song.fromMap(Map<String, dynamic>.from(map)))
+        .toList();
   }
 
   Future<void> clearCache() async {

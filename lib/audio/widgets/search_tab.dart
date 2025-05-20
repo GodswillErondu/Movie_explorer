@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movie_explorer_app/audio/models/song.dart';
 import 'package:movie_explorer_app/audio/providers/audio_player_provider.dart';
-import 'package:movie_explorer_app/audio/screens/audio_screen.dart';
-import 'package:movie_explorer_app/audio/services/audio_service.dart';
 import 'package:movie_explorer_app/audio/widgets/song_list_tile.dart';
 import 'package:movie_explorer_app/draw/screens/drawing_recognition_screen.dart';
 import 'package:provider/provider.dart';
