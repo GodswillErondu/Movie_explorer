@@ -33,6 +33,7 @@ class DrawingScreen extends StatelessWidget {
               },
               onPanUpdate: (details) {
                 drawingProvider.addPoint(details.localPosition);
+                drawingProvider.repaintNotifier.value = !drawingProvider.repaintNotifier.value;
               },
               onPanEnd: (_) {
                 drawingProvider.completeStroke(effectiveColor);
@@ -43,6 +44,7 @@ class DrawingScreen extends StatelessWidget {
                   currentPoints: drawingProvider.currentPoints,
                   currentColor: effectiveColor,
                   currentBrushSize: drawingProvider.brushSize,
+                  repaintNotifier: drawingProvider.repaintNotifier,
                 ),
                 size: Size.infinite,
               ),

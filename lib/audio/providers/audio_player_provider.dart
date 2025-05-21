@@ -35,27 +35,23 @@ class AudioPlayerProvider extends ChangeNotifier {
   String get searchQuery => _searchQuery;
 
   AudioPlayerProvider(this._audioService) {
-    // Listen to player state changes
     _audioPlayer.playerStateStream.listen((playerState) {
       _isPlaying = playerState.playing;
       notifyListeners();
     });
 
-    // Listen to position changes
     _audioPlayer.positionStream.listen((position) {
       _position = position;
       updateProgress(position, _duration);
       notifyListeners();
     });
 
-    // Listen to duration changes
     _audioPlayer.durationStream.listen((duration) {
       _duration = duration ?? Duration.zero;
       updateProgress(_position, _duration);
       notifyListeners();
     });
 
-    // Listen to sequence state for current song changes
     _audioPlayer.currentIndexStream.listen((index) {
       if (index != null && index != _currentIndex) {
         _currentIndex = index;
@@ -68,7 +64,6 @@ class AudioPlayerProvider extends ChangeNotifier {
     _playlist = songs;
     _currentIndex = initialIndex;
 
-    // Create a list of AudioSources from the songs
     final playlist = ConcatenatingAudioSource(
       children: songs
           .map((song) => AudioSource.uri(Uri.parse(song.audioUrl)))
@@ -111,7 +106,6 @@ class AudioPlayerProvider extends ChangeNotifier {
     if (_currentIndex > 0) {
       _audioPlayer.seekToPrevious();
     } else {
-      // If at the beginning, restart the current song
       _audioPlayer.seek(Duration.zero);
     }
   }

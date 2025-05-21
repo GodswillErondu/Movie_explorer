@@ -6,12 +6,15 @@ class DrawingPainter extends CustomPainter {
   final mlkit.Ink ink;
   final List<mlkit.StrokePoint> points;
   final bool isDarkMode;
+  final ValueNotifier<bool> repaintNotifier;
+
 
   DrawingPainter({
     required this.ink,
     required this.points,
     required this.isDarkMode,
-  });
+    required this.repaintNotifier
+  }) : super(repaint: repaintNotifier);
 
   @override
   void paint(Canvas canvas, Size size) {

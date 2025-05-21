@@ -123,7 +123,7 @@ class AudioService {
     }
   }
 
-  // Mock data for development/demo purposes
+  // Mock data for development
   List<Song> _getMockSongs() {
     return [
       Song(
@@ -131,7 +131,7 @@ class AudioService {
         title: "Summer Nights",
         artist: "Electronic Dreams",
         albumArt:
-            "https://picsum.photos/300", // Changed from via.placeholder.com
+            "https://picsum.photos/300",
         audioUrl:
             "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
         duration: 240,
@@ -141,7 +141,7 @@ class AudioService {
         title: "Acoustic Sunrise",
         artist: "Guitar Masters",
         albumArt:
-            "https://picsum.photos/300", // Changed from via.placeholder.com
+            "https://picsum.photos/300",
         audioUrl:
             "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
         duration: 185,
@@ -151,7 +151,7 @@ class AudioService {
         title: "Midnight Jazz",
         artist: "Smooth Saxophones",
         albumArt:
-            "https://picsum.photos/300", // Changed from via.placeholder.com
+            "https://picsum.photos/300",
         audioUrl:
             "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
         duration: 210,

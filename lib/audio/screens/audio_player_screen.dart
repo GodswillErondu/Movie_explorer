@@ -5,7 +5,7 @@ import 'package:movie_explorer_app/audio/providers/audio_player_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class AudioPlayerScreen extends StatelessWidget {
-  const AudioPlayerScreen({Key? key}) : super(key: key);
+  const AudioPlayerScreen({super.key});
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');

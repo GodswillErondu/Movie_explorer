@@ -24,6 +24,9 @@ class DrawingRecognitionProvider extends ChangeNotifier {
 
   bool get isModelDownloaded => _isModelDownloaded;
 
+  final repaintNotifier = ValueNotifier(false);
+
+
   DrawingRecognitionProvider() {
     _checkAndDownloadModel();
   }

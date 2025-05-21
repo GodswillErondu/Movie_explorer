@@ -5,7 +5,10 @@ import 'package:movie_explorer_app/draw/widgets/drawing_painter.dart';
 import 'package:provider/provider.dart';
 
 class DrawingRecognitionScreen extends StatelessWidget {
-   const DrawingRecognitionScreen({super.key});
+  final bool isFromAudioSearch;
+
+
+   const DrawingRecognitionScreen({super.key, this.isFromAudioSearch = false,});
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<DrawingRecognitionProvider>(context,);
@@ -18,6 +21,7 @@ class DrawingRecognitionScreen extends StatelessWidget {
         Navigator.pop(context, provider.recognizedText);
       }
     }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -25,6 +29,7 @@ class DrawingRecognitionScreen extends StatelessWidget {
           style: theme.appBarTheme.titleTextStyle,
         ),
         actions: [
+          if (isFromAudioSearch)
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: provider.isProcessing ? null : submitRecognizedText,
@@ -61,6 +66,7 @@ class DrawingRecognitionScreen extends StatelessWidget {
                 },
                 onPanUpdate: (details) {
                  provider.updateStroke(details.localPosition);
+                 provider.repaintNotifier.value = !provider.repaintNotifier.value;
                 },
                 onPanEnd: (details) {
                  provider.endStroke();
@@ -69,6 +75,7 @@ class DrawingRecognitionScreen extends StatelessWidget {
                   builder: (context, provider, _) {
                     return CustomPaint(
                       painter: DrawingPainter(
+                        repaintNotifier: provider.repaintNotifier,
                         ink: provider.ink,
                         points: provider.points,
                         isDarkMode: isDarkMode,

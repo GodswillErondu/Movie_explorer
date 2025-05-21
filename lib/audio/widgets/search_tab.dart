@@ -77,7 +77,7 @@ class SearchBar extends StatelessWidget {
     final result = await Navigator.push<String>(
       context,
       MaterialPageRoute(
-        builder: (context) => const DrawingRecognitionScreen(),
+        builder: (context) => const DrawingRecognitionScreen(isFromAudioSearch: true),
       ),
     );
 

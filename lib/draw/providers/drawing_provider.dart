@@ -2,28 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:movie_explorer_app/draw/models/stroke.dart';
 
 class DrawingProvider extends ChangeNotifier {
-   List<Stroke> _strokes = [];
+  List<Stroke> _strokes = [];
   List<Stroke> _redoStrokes = [];
   List<Offset> _currentPoints = [];
   Color? _selectedColor;
   double _brushSize = 4.0;
   bool _isEraser = false;
 
-
   List<Stroke> get strokes => _strokes;
+
   List<Stroke> get redoStrokes => _redoStrokes;
+
   List<Offset> get currentPoints => _currentPoints;
+
   Color? get selectedColor => _selectedColor;
+
   double get brushSize => _brushSize;
+
   bool get isEraser => _isEraser;
+
   bool get canUndo => _strokes.isNotEmpty;
+
   bool get canRedo => _redoStrokes.isNotEmpty;
+
+  final repaintNotifier = ValueNotifier(false);
 
   Color getEffectiveColor(BuildContext context) {
     if (_isEraser) {
       return Theme.of(context).scaffoldBackgroundColor;
     }
-
 
     if (_selectedColor == null) {
       return Theme.of(context).brightness == Brightness.dark

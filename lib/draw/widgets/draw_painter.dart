@@ -6,14 +6,15 @@ class DrawPainter extends CustomPainter {
   final List<Offset> currentPoints;
   final Color currentColor;
   final double currentBrushSize;
+  final ValueNotifier<bool> repaintNotifier;
 
   DrawPainter({
     required this.strokes,
     required this.currentPoints,
     required this.currentColor,
     required this.currentBrushSize,
-    super.repaint,
-  });
+    required this.repaintNotifier,
+  }): super(repaint: repaintNotifier);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -45,7 +46,11 @@ class DrawPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(DrawPainter oldDelegate) {
+    return oldDelegate.strokes != strokes ||
+        oldDelegate.currentPoints != currentPoints ||
+        oldDelegate.currentColor != currentColor ||
+        oldDelegate.currentBrushSize != currentBrushSize;
+}
+
 }

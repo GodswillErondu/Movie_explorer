@@ -33,15 +33,11 @@ class CacheService {
     } catch (e) {
     }
 
-    _registerAdapters();
-
     final service = CacheService();
     await service._openBoxes();
     return service;
   }
 
-  static void _registerAdapters() {
-  }
 
   Future<void> _openBoxes() async {
     try {
