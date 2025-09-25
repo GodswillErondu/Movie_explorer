@@ -39,7 +39,7 @@ class AppTheme {
     ),
 
     // Card theme
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: ThemeConstants.lightSurfaceColor,
       elevation: ThemeConstants.cardElevation,
       shape: RoundedRectangleBorder(
@@ -99,7 +99,7 @@ class AppTheme {
     ),
 
     // Tab Bar theme
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       labelStyle: GoogleFonts.roboto(
         fontSize: 16,
         fontWeight: FontWeight.w600,
@@ -176,7 +176,7 @@ class AppTheme {
     ),
 
     // Card theme
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: ThemeConstants.darkSurfaceColor,
       elevation: ThemeConstants.cardElevation,
       shape: RoundedRectangleBorder(
@@ -236,7 +236,7 @@ class AppTheme {
     ),
 
     // Tab Bar theme
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       labelStyle: GoogleFonts.roboto(
         fontSize: 16,
         fontWeight: FontWeight.w600,
